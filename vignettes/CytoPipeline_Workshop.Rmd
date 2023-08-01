@@ -1,0 +1,45 @@
+---
+title: "CytoPipeline: Building and visualizing automated pre-processing and quality control pipelines for flow cytometry data"
+author:
+  - Philippe Hauchamps ^[de Duve Institute, UCLouvain, philippe.hauchamps@uclouvain.be]
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{CytoPipeline Workshop}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  package.startup.message = FALSE,
+  rmarkdown.html_vignette.check_title = FALSE,
+  eval=FALSE)
+```
+
+## Overview
+
+TO DO
+
+### Pre-requisites
+
+- Basic familiarity with flow cytometry data and data structures
+- Interest in building data pre-processing pipelines for flow cytometry data
+
+### Workshop Participation
+
+The workshop format is a 45 minute session consisting of hands-on demos, 
+and Q&A.
+
+### R / Bioconductor packages used
+- CytoPipeline
+- CytoPipelineGUI
+- CytoPipelineUtils (from public github repository)
+
+### Description
+
+
+
+
+
