@@ -15,8 +15,24 @@ knitr::opts_chunk$set(
   comment = "#>",
   package.startup.message = FALSE,
   rmarkdown.html_vignette.check_title = FALSE,
-  eval=FALSE)
+  eval=TRUE)
 ```
+
+
+```{r pkg, include = FALSE}
+require(CytoPipelineGUI)
+require(CytoPipelineUtils)
+```
+
+## Test
+Test displaying version of all packages:
+
+```{r tst, echo = FALSE, show = TRUE}
+cat("CytoPipeline version:", as.character(packageVersion("CytoPipeline")))
+cat("CytoPipelineGUI version:", as.character(packageVersion("CytoPipelineGUI")))
+cat("CytoPipelineUtils version:", as.character(packageVersion("CytoPipelineUtils")))
+```
+
 
 ## Overview
 
