@@ -55,6 +55,172 @@ and Q&A.
 
 ### Description
 
+```{r, step1}
+rawDataDir <- "./rawData"
+resultsDir <- 
+    "./Results"
+
+mySamples <- 
+    file.path(rawDataDir, 
+    c("D91_G01.fcs",
+      "D93_C01.fcs"))
+
+
+expName <- "CytoPipeline_Demo"
+
+
+# 1.
+jsonFile <- ("CytoPipeline_Demo_pipeline.json")
+
+# creation of CytoPipeline object,
+# using json file as input
+pipL <- CytoPipeline(jsonFile, 
+                     experimentName = expName,
+                     sampleFiles = mySamples)
+
+# display CytoPipeline object
+pipL
+
+plotCytoPipelineProcessingQueue(pipL, 
+                                whichQueue = "pre-processing",
+                                path = resultsDir,
+                                sampleFile = 1)
+
+
+```
+
+```{r, step2:with_errors}
+
+# 2.
+
+# execute pipeline
+try(execute(pipL, path = resultsDir))
+
+plotCytoPipelineProcessingQueue(pipL, 
+                                whichQueue = "pre-processing",
+                                path = resultsDir,
+                                sampleFile = 1)
+
+
+# launch shiny app
+CytoPipelineGUI::CytoPipelineCheckApp(dir = resultsDir)
+
+```
+
+```{r, step2:ok}
+
+
+jsonFile <- ("CytoPipeline_Demo_pipeline2.json")
+
+# creation of CytoPipeline object,
+# using json file as input
+pipL <- CytoPipeline(jsonFile, 
+                     experimentName = expName,
+                     sampleFiles = mySamples)
+
+# execute pipeline
+try(execute(pipL, path = resultsDir))
+
+plotCytoPipelineProcessingQueue(pipL, 
+                                whichQueue = "pre-processing",
+                                path = resultsDir,
+                                sampleFile = 1)
+
+
+# launch shiny app
+CytoPipelineGUI::CytoPipelineCheckApp(dir = resultsDir)
+
+```
+
+```{r step3:nClust-2}
+
+# 3.
+
+# create pipeline with nClust = 2
+
+expName <- "HBVT_Demo_2C"
+
+jsonFile <- ("CytoPipeline_Demo_pipeline3.json")
+
+pipL2 <- CytoPipeline(jsonFile,
+                      experimentName = expName,
+                      sampleFiles = mySamples)
+
+plotCytoPipelineProcessingQueue(pipL2, 
+                                whichQueue = "pre-processing",
+                                path = resultsDir,
+                                sampleFile = 1)
+
+# launch shiny app
+CytoPipelineGUI::CytoPipelineCheckApp(dir = resultsDir)
+
+```
+
+```{r, step3:execute}
+
+# execute pipeline
+execute(pipL2, path = resultsDir)
+
+plotCytoPipelineProcessingQueue(pipL2, 
+                                whichQueue = "pre-processing",
+                                path = resultsDir,
+                                sampleFile = 1)
+
+CytoPipelineGUI::CytoPipelineCheckApp(dir = resultsDir)
+```
+
+
+
+
+```{r, step4}
+# 4.
+# creation of a new CytoPipeline object,
+# using json file as input (flowAI)
+pipL_flowAI <- CytoPipeline("CytoPipeline_Demo_pipeline_flowAI.json",
+                            experimentName = "HBVT_Demo_flowAI",
+                            sampleFiles = mySamples)
+
+# display CytoPipeline object
+pipL_flowAI
+
+# execute pipeline
+execute(pipL_flowAI, path = resultsDir)
+
+plotCytoPipelineProcessingQueue(pipL_flowAI, 
+                                whichQueue = "pre-processing",
+                                path = resultsDir,
+                                sampleFile = 1)
+
+CytoPipelineGUI::CytoPipelineCheckApp(dir = resultsDir)
+```
+
+
+```{r, step5a}
+# 5a. execute pipeline with rmCache = TRUE
+
+plotCytoPipelineProcessingQueue(pipL_flowAI, 
+                                whichQueue = "pre-processing",
+                                path = resultsDir,
+                                sampleFile = 1)
+
+
+execute(pipL_flowAI, path = resultsDir, rmCache = TRUE)
+```
+
+```{r, step5b}
+# 5b. execute pipeline in parallel
+bp <- BiocParallel::SnowParam(progressbar = TRUE)
+
+execute(pipL_flowAI, path = resultsDir, rmCache = TRUE, useBiocParallel = TRUE,
+        BPPARAM = bp,
+        BPOPTIONS = BiocParallel::bpoptions(package = c("flowCore", 
+                                                        "CytoPipelineUtils")))
+```
+
+```{r, step6}
+# 6. show scale transformations
+CytoPipelineGUI::ScaleTransformApp(dir = resultsDir)
+```
 
 
 
