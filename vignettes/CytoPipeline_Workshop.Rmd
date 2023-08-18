@@ -1,5 +1,5 @@
 ---
-title: "CytoPipeline: Building and visualizing automated pre-processing and quality control pipelines for flow cytometry data"
+title: "Building and visualizing pre-processing pipelines for flow cytometry data with CytoPipeline"
 author:
   - Philippe Hauchamps ^[de Duve Institute, UCLouvain, philippe.hauchamps@uclouvain.be]
 output: rmarkdown::html_vignette
@@ -18,13 +18,74 @@ knitr::opts_chunk$set(
   eval=TRUE)
 ```
 
-
 ```{r pkg, include = FALSE}
 require(CytoPipelineGUI)
 require(CytoPipelineUtils)
 ```
 
-## Test
+# Building and visualizing pre-processing pipelines for flow cytometry data with `CytoPipeline`
+
+Authors:
+    Philippe Hauchamps ^[de Duve Institute, UCLouvain].
+    <br/>
+Last modified: 18 August, 2023.
+
+## Overview
+
+### Description
+
+This workshop provides a life example on how to build, run and visualize
+flow cytometry data pre-processing pipelines, using the `CytoPipeline`
+suite of packages.
+
+### Pre-requisites
+
+- Basic familiarity with flow cytometry (FC) data and data structures 
+(e.g. flowCore::flowFrame)
+- Interest in building automated data pre-processing pipelines 
+for cytometry data
+- Some knowledge about typical FC data pre-processing steps: compensation, 
+scale transformation, quality control of signal stability in time, 
+removal of un-desirable events, like doublets, debris, dead cells,etc.
+A good overview article is (Liechti et al. 2021).
+
+
+### Participation
+
+The present `.Rmd` file  is designed to support, either an instructor-led live 
+demo, or a lab format where participants run the example code on their own.  
+Therefore it is up to you to decide how to spend your time during the
+workshop, either by listening to the instructor, or by running the code chunks
+one by one at your own pace, or a combination of both.
+
+### _R_ / _Bioconductor_ packages used
+
+- CytoPipeline (available in _Bioconductor°_ since 3.17)
+- CytoPipelineGUI (submitted to _Bioconductor_, target version 3.18)
+- CytoPipelineUtils (from public github repository)
+
+### Time outline
+
+| Activity                     | Time |
+|------------------------------|------|
+| Introduction                 | 10m  |
+| Section 1                    | 15m  |
+| Section 2                    | 10m  |
+| Conclusion                   | 10m  |
+
+### Workshop goals and objectives
+
+* understand the basic concepts and infrastructure used by the `CytoPipeline`
+suite of package.
+* build and run a FC pre-processing pipeline using `CytoPipeline`, on a simple
+example FC dataset.
+* understand the added value of the visualization tools (`CYtoPipelineGUI`) 
+for assessing the quality of the pipeline.
+
+## Workshop
+
+
+### Test
 Test displaying version of all packages:
 
 ```{r tst, echo = FALSE, show = TRUE}
@@ -33,27 +94,25 @@ cat("CytoPipelineGUI version:", as.character(packageVersion("CytoPipelineGUI")))
 cat("CytoPipelineUtils version:", as.character(packageVersion("CytoPipelineUtils")))
 ```
 
+### Introduction
 
-## Overview
+#### Context
 
-TO DO
+#### The example dataset
 
-### Pre-requisites
+#### Target pipelines 
 
-- Basic familiarity with flow cytometry data and data structures
-- Interest in building data pre-processing pipelines for flow cytometry data
 
-### Workshop Participation
+#### Essential CytoPipeline concepts
 
-The workshop format is a 45 minute session consisting of hands-on demos, 
-and Q&A.
 
-### R / Bioconductor packages used
-- CytoPipeline
-- CytoPipelineGUI
-- CytoPipelineUtils (from public github repository)
+### Creating a CytoPipeline object
 
-### Description
+
+#### Step by step creation in R code
+
+
+#### Centralizing the pipeline definition in a json file
 
 ```{r, step1}
 rawDataDir <- "./rawData"
@@ -88,6 +147,9 @@ plotCytoPipelineProcessingQueue(pipL,
 
 
 ```
+
+
+### Executing and visualizing the pipeline run 
 
 ```{r, step2:with_errors}
 
@@ -151,10 +213,9 @@ plotCytoPipelineProcessingQueue(pipL2,
                                 path = resultsDir,
                                 sampleFile = 1)
 
-# launch shiny app
-CytoPipelineGUI::CytoPipelineCheckApp(dir = resultsDir)
-
 ```
+
+
 
 ```{r, step3:execute}
 
@@ -165,12 +226,19 @@ plotCytoPipelineProcessingQueue(pipL2,
                                 whichQueue = "pre-processing",
                                 path = resultsDir,
                                 sampleFile = 1)
-
-CytoPipelineGUI::CytoPipelineCheckApp(dir = resultsDir)
 ```
 
 
+``` {r, resultsViz}
 
+
+# launch shiny app
+CytoPipelineGUI::CytoPipelineCheckApp(dir = resultsDir)
+
+```
+
+
+### Comparing pipelines
 
 ```{r, step4}
 # 4.
@@ -195,6 +263,10 @@ CytoPipelineGUI::CytoPipelineCheckApp(dir = resultsDir)
 ```
 
 
+### Some technical flags
+
+#### Cleaning the cache before running
+
 ```{r, step5a}
 # 5a. execute pipeline with rmCache = TRUE
 
@@ -207,6 +279,8 @@ plotCytoPipelineProcessingQueue(pipL_flowAI,
 execute(pipL_flowAI, path = resultsDir, rmCache = TRUE)
 ```
 
+#### Running sample files in parallel
+
 ```{r, step5b}
 # 5b. execute pipeline in parallel
 bp <- BiocParallel::SnowParam(progressbar = TRUE)
@@ -217,11 +291,30 @@ execute(pipL_flowAI, path = resultsDir, rmCache = TRUE, useBiocParallel = TRUE,
                                                         "CytoPipelineUtils")))
 ```
 
+### Visualization of scale transformations
+
 ```{r, step6}
 # 6. show scale transformations
 CytoPipelineGUI::ScaleTransformApp(dir = resultsDir)
 ```
 
 
+# References
 
+Emmaneel, Annelies, Katrien Quintelier, Dorine Sichien, Paulina Rybakowska, 
+Concepción Marañón, Marta E. Alarcón-Riquelme, Gert Van Isterdael, 
+Sofie Van Gassen, and Yvan Saeys. 2021. 
+“PeacoQC: Peak-Based Selection of High Quality Cytometry Data.” 
+Cytometry. Part A: The Journal of the International Society 
+for Analytical Cytology, September. https://doi.org/10.1002/cyto.a.24501.
+
+Liechti, Thomas, Lukas M. Weber, Thomas M. Ashhurst, Natalie Stanley, 
+Martin Prlic, Sofie Van Gassen, and Florian Mair. 2021. 
+“An Updated Guide for the Perplexed: Cytometry in the High-Dimensional Era.” 
+Nature Immunology 22 (10): 1190–97.
+
+Monaco, Gianni, Hao Chen, Michael Poidinger, Jinmiao Chen, 
+João Pedro de Magalhães, and Anis Larbi. 2016. 
+“flowAI: Automatic and Interactive Anomaly Discerning Tools 
+for Flow Cytometry Data.” Bioinformatics  32 (16): 2473–80.
 
