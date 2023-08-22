@@ -18,10 +18,11 @@ RoxygenNote: 7.2.3
 Depends: 
     CytoPipeline,
     CytoPipelineGUI,
-    CytoPipelineUtils
-Suggests: 
+    CytoPipelineUtils,
+    patchwork,
     knitr,
-    rmarkdown,
+    rmarkdown
+Suggests: 
     pkgdown
 Remotes: 
     UCLouvain-CBIO/CytoPipelineGUI,

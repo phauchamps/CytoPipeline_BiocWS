@@ -1,12 +1,43 @@
 {
-  "scaleTransformProcessingSteps": [  	
-	{
-	  "name": ["scale_transform_read"],
-      "FUN": ["readRDSObject"],
-      "ARGS": { 
-	    "RDSFile": ["CytoPipelineDemo_scale_transfos.rds"]
-	  }
-	}
+  "scaleTransformProcessingSteps": [
+    {
+      "name": ["flowframe_read"],
+      "FUN": ["readSampleFiles"],
+      "ARGS": {
+        "whichSamples": ["all"],
+        "truncate_max_range": [false],
+        "min.limit": null
+      }
+    },
+    {
+      "name": ["remove_margins"],
+      "FUN": ["removeMarginsPeacoQC"],
+      "ARGS": []
+    },
+    {
+      "name": ["compensate"],
+      "FUN": ["compensateFromMatrix"],
+      "ARGS": {
+        "matrixSource": ["fcs"]
+      }
+    },
+    {
+      "name": ["flowframe_aggregate"],
+      "FUN": ["aggregateAndSample"],
+      "ARGS": {
+        "nTotalEvents": [10000],
+        "seed": [0]
+      }
+    },
+    {
+      "name": ["scale_transform_estimate"],
+      "FUN": ["estimateScaleTransforms"],
+      "ARGS": {
+        "fluoMethod": ["estimateLogicle"],
+        "scatterMethod": ["linearQuantile"],
+        "scatterRefMarker": ["CD4"]
+      }
+    }
   ],  
   "flowFramesPreProcessingSteps": [
     {
@@ -66,8 +97,7 @@
       "name": ["compensate"],
       "FUN": ["compensateFromMatrix"],
       "ARGS": {
-        "matrixSource": ["import"],
-		"matrixPath" : ["Compensations Liver D91.csv"]
+        "matrixSource": ["fcs"]
       }
     }
   ]  

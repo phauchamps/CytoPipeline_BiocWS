@@ -1,10 +1,10 @@
 ---
-title: "Building and visualizing pre-processing pipelines for flow cytometry data with CytoPipeline"
+title: "Building and visualizing pre-processing pipelines for cytometry data with CytoPipeline"
 author:
   - Philippe Hauchamps ^[de Duve Institute, UCLouvain, philippe.hauchamps@uclouvain.be]
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{CytoPipeline Workshop}
+  %\VignetteIndexEntry{Building and visualizing pre-processing pipelines for cytometry data with CytoPipeline}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -21,36 +21,35 @@ knitr::opts_chunk$set(
 ```{r pkg, include = FALSE}
 require(CytoPipelineGUI)
 require(CytoPipelineUtils)
+require(patchwork)
 ```
 
-# Building and visualizing pre-processing pipelines for flow cytometry data with `CytoPipeline`
+Last modified: 22 August, 2023.
 
-Authors:
-    Philippe Hauchamps ^[de Duve Institute, UCLouvain].
-    <br/>
-Last modified: 18 August, 2023.
+<br/>
 
-## Overview
+# Overview
 
-### Description
+## Description
 
 This workshop provides a life example on how to build, run and visualize
-flow cytometry data pre-processing pipelines, using the `CytoPipeline`
+cytometry data pre-processing pipelines, using the `CytoPipeline` 
 suite of packages.
 
-### Pre-requisites
+## Pre-requisites
 
 - Basic familiarity with flow cytometry (FC) data and data structures 
-(e.g. flowCore::flowFrame)
+(e.g. flowCore::flowFrame)  
 - Interest in building automated data pre-processing pipelines 
-for cytometry data
-- Some knowledge about typical FC data pre-processing steps: compensation, 
-scale transformation, quality control of signal stability in time, 
+for cytometry data  
+- Some knowledge about typical cytometry data pre-processing steps: 
+compensation, scale transformation, 
+quality control of signal stability in time, 
 removal of un-desirable events, like doublets, debris, dead cells,etc.
 A good overview article is (Liechti et al. 2021).
 
 
-### Participation
+## Participation
 
 The present `.Rmd` file  is designed to support, either an instructor-led live 
 demo, or a lab format where participants run the example code on their own.  
@@ -58,63 +57,142 @@ Therefore it is up to you to decide how to spend your time during the
 workshop, either by listening to the instructor, or by running the code chunks
 one by one at your own pace, or a combination of both.
 
-### _R_ / _Bioconductor_ packages used
+## _R_ / _Bioconductor_ packages used
 
 - CytoPipeline (available in _Bioconductor°_ since 3.17)
 - CytoPipelineGUI (submitted to _Bioconductor_, target version 3.18)
 - CytoPipelineUtils (from public github repository)
 
-### Time outline
+## Time outline
 
-| Activity                     | Time |
-|------------------------------|------|
-| Introduction                 | 10m  |
-| Section 1                    | 15m  |
-| Section 2                    | 10m  |
-| Conclusion                   | 10m  |
+| Activity                                              | Time |
+|-------------------------------------------------------|------|
+| Introduction                                          | 10m  |
+| Creating a CytoPipeline object                        | 10m  |
+| Executing and visualizing the pipeline run            | 15m  |
+| Visualization of scale transformations                |  5m  |
+| Technical options to fine-tune pipeline execution     |  5m  |
 
-### Workshop goals and objectives
+## Workshop goals and objectives
 
 * understand the basic concepts and infrastructure used by the `CytoPipeline`
 suite of package.
-* build and run a FC pre-processing pipeline using `CytoPipeline`, on a simple
-example FC dataset.
+* build and run a cytometry data pre-processing pipeline using `CytoPipeline`, 
+on a simple example FC dataset.
 * understand the added value of the visualization tools (`CYtoPipelineGUI`) 
 for assessing the quality of the pipeline.
 
-## Workshop
+# Workshop
 
+## Introduction
 
-### Test
-Test displaying version of all packages:
+### Context
 
-```{r tst, echo = FALSE, show = TRUE}
-cat("CytoPipeline version:", as.character(packageVersion("CytoPipeline")))
-cat("CytoPipelineGUI version:", as.character(packageVersion("CytoPipelineGUI")))
-cat("CytoPipelineUtils version:", as.character(packageVersion("CytoPipelineUtils")))
+Automated analysis of cytometry data can be schematically split into different 
+big parts, as is shown in Figure 1. 
+
+```{r highLevelWorkflowDisplay, results='markup', fig.cap="Fig. 1: high level workflow for cytometry data analysis - adapted from (Liechti et al, 2021).", echo=FALSE, out.width='75%', fig.align='center', fig.wide = TRUE}
+knitr::include_graphics("figs/FCDataAnalysis_OverallWorkflow.png", error = FALSE)
 ```
 
-### Introduction
+The `CytoPipeline` packages suite is aimed at facilitating the design and 
+assessment of automated pre-processing pipelines for cytometry data
+analysis. This means that we are targeting 
+the 'Data pre-processing' box in Figure 1. 
 
-#### Context
+For flow cytometry data, this pre-processing part typically contains the 
+following steps:
+- *signal compensation*, i.e. a linear transformation of the intensity matrix,
+in order to cope with *spillover* of channel light signal to the other channels  
+- *scale transformation*, i.e. non linear transformation of fluorescent signal,
+in order to better to obtain a better separation between cell populations  
+- *QC in time*, i.e. control of signal stability in time  
+- filtering of undesirable events like *margins* (outliers), debris, doublets 
+and dead cells.  
 
-#### The example dataset
+### The example dataset
 
-#### Target pipelines 
+In order to demonstrate CytoPipeline usage, we will use of an example dataset, 
+the _HBV mouse dataset_. This dataset was collected during a preclinical study 
+aimed at assessing the effect of different therapeutic vaccine regimens 
+on the immune response of Hepatitis B Virus transduced mice.
+
+In short, 55 mice, split in 5 different experimental groups, 
+according to their vaccine regimen or HBV transduction status, were immunized 
+at different timepoints. Upon sacrifice, liver tissue sample fragments 
+were collected, treated as to isolate the lymphocytes cell population, 
+and subsequently analysed in a flow cytometer for immuno-phenotyping. 
+This experiment resulted in the acquisition of 55 `fcs` raw data file, 
+with a flow cytometry panel of 12 different channels.
+
+Here we will work on a small subset of this dataset, containing 
+two samples, respectively labelled _D91_A01_ and _D93_C01_.
+
+### Target pipelines 
+
+In this workshop, we will pre-process the two samples of our dataset, using two 
+different pipeline set-ups, aiming at comparing two different QC in time 
+methods : 
+- *flowAI* (Monaco et al, 2016)
+- *PeacoQC* (Emmaneel et al, 2021).
+
+In both pipelines, the first part consists in estimating appropriate scale
+transformation functions for all channels present in the sample `flowFrame`.
+In order to do this, we propose the following *scale transformation processing 
+queue* (Fig. 2):   
+
+- reading the three samples `.fcs` files
+- removing the margin events from each file
+- applying compensation for each file
+- aggregating and sub-sampling from each file
+- estimating the scale transformations from the aggregated 
+and sub-sampled data   
+
+```{r scaleTransformQueueDisplay, results='markup', fig.cap="Fig.2 : Scale transform processing queue", echo=FALSE, out.width='75%', fig.align='center', fig.wide = TRUE}
+knitr::include_graphics("figs/scaleTransformQueue.png", error = FALSE)
+```
+
+When this first part is done, one can apply pre-processing for each file 
+one by one. However, depending on the choice of QC in time method, 
+the order of steps needs to be slightly different:
+
+- when using *flowAI*, it is advised to eliminate the 'bad events' 
+starting from raw data - see (Monaco et al, 2016).
+- when using *PeacoQC*, it is advised to eliminate the 'bad events' 
+from already compensated and scale transformed data - 
+see (Emmaneel et al, 2021).
+
+Therefore, we propose the following *pre-processing queues* represented in 
+Fig. 3.
+
+```{r preProcessingQueueDisplay, results='markup', fig.cap="Fig. 3 : Pre-processing queue for two different pipeline settings", echo=FALSE, out.width='100%', fig.align='center', fig.wide = TRUE}
+knitr::include_graphics("figs/preProcessingQueues.png", error = FALSE)
+```
+
+### Essential CytoPipeline concepts
+
+The *CytoPipeline* framework is based on two main concepts, 
+namely *CytoPipeline* and *CytoProcessingSteps*. 
+A *CytoPipeline* object centralizes the pipeline definition, 
+and specifies the run order of the different pipeline steps. 
+On top of the steps definition, it also has an *experimentName* 
+as a key for storing the results, and a vector of sample files on which to run 
+the pipeline.
+
+These *CytoPipeline* steps materialize as *CytoProcessingStep* objects, 
+which store pipeline step names and the corresponding R functions 
+that will be called at execution time. 
+These functions are either provided within the *CytoPipeline* package itself, 
+exported from third party packages, or coded by the user themself. 
+Together with the function name to be called, a *CytoProcessingStep* object 
+also contains the list of parameters that are used as arguments to the function.
 
 
-#### Essential CytoPipeline concepts
+## Creating a CytoPipeline object
 
+```{r preliminaries, include = FALSE}
+# preliminaries : define sample files and and set path to results output 
 
-### Creating a CytoPipeline object
-
-
-#### Step by step creation in R code
-
-
-#### Centralizing the pipeline definition in a json file
-
-```{r, step1}
 rawDataDir <- "./rawData"
 resultsDir <- 
     "./Results"
@@ -122,14 +200,72 @@ resultsDir <-
 mySamples <- 
     file.path(rawDataDir, 
     c("D91_G01.fcs",
-      "D93_C01.fcs"))
+      "D91_A01.fcs"))
 
+```
+
+There are essentially two ways to create a *CytoPipeline* object, 
+either by defining the *CytoProcessingStep* one by one using R code,
+or by providing a json file as in input.
+
+### Step by step creation in R code
+
+Here we show an extract on how to build the pipeline step by step in R code,
+showing only the code to include the first two steps for building 
+the scale transformation. 
+
+When done, we print the content of the *CytoPipeline* object.
+
+```{r step0, comment = ''}
 
 expName <- "CytoPipeline_Demo"
 
+pipL0 <- CytoPipeline(experimentName = expName,
+                      sampleFiles = mySamples)
+
+### SCALE TRANSFORMATION STEPS ###
+
+pipL0 <- addProcessingStep(pipL0,
+                           whichQueue = "scale transform",
+                           CytoProcessingStep(
+                                name = "flowframe_read",
+                                FUN = "readSampleFiles",
+                                ARGS = list(
+                                    whichSamples = "all",
+                                    truncate_max_range = FALSE,
+                                    min.limit = NULL
+                                )))
+
+pipL0 <- addProcessingStep(pipL0,
+                           whichQueue = "scale transform",
+                           CytoProcessingStep(
+                               name = "remove_margins",
+                               FUN = "removeMarginsPeacoQC",
+                               ARGS = list()))
+        
+pipL0   
+
+```
+
+### Centralizing the pipeline definition in a json file
+
+However, the easiest, and most concise way to define a *CytoPipeline* object 
+is by using a json file. Here we will use the following input file, 
+which specifies the *PeacoQC* pipeline as described above.
+
+```{r jsonFileShow, comment = ''}
+jsonFile <- ("CytoPipeline_Demo_pipeline.json")
+cat(readLines(jsonFile), sep = '\n')
+```
+
+We now create our *CytoPipeline* object using this json file as input, and 
+print the content of the object again. 
+
+```{r step1, comment = ''}
+
 
 # 1.
-jsonFile <- ("CytoPipeline_Demo_pipeline.json")
+
 
 # creation of CytoPipeline object,
 # using json file as input
@@ -140,37 +276,68 @@ pipL <- CytoPipeline(jsonFile,
 # display CytoPipeline object
 pipL
 
+```
+
+As soon as the *CytoPipeline* object is created, it is possible to 
+visualize the pipeline as a workflow plot, using the
+`CytoPipeline::plotCytoPipelineProcessingQueue()` function.  
+
+
+```{r step2:plot, out.height=450, out.width=600, fig.height=4.5, fig.width=6, fig.align='center'}
 plotCytoPipelineProcessingQueue(pipL, 
                                 whichQueue = "pre-processing",
                                 path = resultsDir,
                                 sampleFile = 1)
-
-
 ```
 
+In this plot, each arrow represents a step (as defined by the user), and
+the results of each step is represented as a bubble. Here, all bubbles are 
+colored in orange, meaning that there is no results yet available for these 
+steps, since the pipeline has not been executed yet.
 
-### Executing and visualizing the pipeline run 
 
-```{r, step2:with_errors}
+## Executing and visualizing the pipeline run 
+
+### Base pipeline
+
+When the *CytoPipeline* object has been created with all needed steps, we 
+can run it, by calling the `CytoPipeline::execute()` function.  
+
+```{r step2:with_errors}
 
 # 2.
 
 # execute pipeline
 try(execute(pipL, path = resultsDir))
+```
 
+Here, this leads to an error message in the `remove_debris` step, complaining that the `nClust` 
+argument is missing. This error is due to the fact that we intentionally left a typo 
+in our input json file, replacing the `nclust` parameter 
+with a `nClusters` parameter :-O !  
+
+Now it is interesting to take a look at the workflow plot: 
+
+```{r step2_with_errors_plot, out.height=450, out.width=600, fig.height=4.5, fig.width=6, fig.align='center'}
 plotCytoPipelineProcessingQueue(pipL, 
                                 whichQueue = "pre-processing",
                                 path = resultsDir,
                                 sampleFile = 1)
 
-
-# launch shiny app
-CytoPipelineGUI::CytoPipelineCheckApp(dir = resultsDir)
-
 ```
 
-```{r, step2:ok}
+Note that the first three bubbles are now highlighted in green, showing that
+the first three steps have now produced results. These results have in fact
+been saved in a data cache, allowing for further visualization of the results.  
 
+However, as mentioned earlier, the fourth step, 'remove_debris', 
+has resulted in an error, hence there is still not corresponding results, 
+and so the corresponding bubble is still displayed with an orange contour.  
+
+Let's now correct our typo in the json file, and re-run our pipeline, under 
+the same experiment name : 
+
+```{r step2_ok, out.height=450, out.width=600, fig.height=4.5, fig.width=6, fig.align='center'}
 
 jsonFile <- ("CytoPipeline_Demo_pipeline2.json")
 
@@ -189,35 +356,105 @@ plotCytoPipelineProcessingQueue(pipL,
                                 sampleFile = 1)
 
 
+```
+
+
+The pipeline now executes correctly! Note that all steps that were previously 
+correctly executed are not re-run, the results are indeed read from the data 
+cache.
+
+<br/>
+
+Let us now visualize our results, using one of the two shiny applications 
+implemented in the *CytoPipelineGUI* package.
+
+```{r, step2_viz}
+
 # launch shiny app
 CytoPipelineGUI::CytoPipelineCheckApp(dir = resultsDir)
 
 ```
 
-```{r step3:nClust-2}
+When visualizing interactively the results of our pipeline, more specifically 
+when looking at the `remove_debris` step, we can notice that this step 
+was not totally effective in removing all undesirable events in the FSC-A/SSC-A 
+2D representation. 
+
+<br/>
+
+```{r step2_viz_prog, out.height=300, out.width=900, fig.height=6, fig.width=18, fig.align='center', echo = FALSE, message = FALSE}
+
+if (!interactive()) {
+    p1 <- CytoPipelineGUI::plotSelectedFlowFrame(
+    experimentName = expName,
+    whichQueue = "pre-processing",
+    sampleFile = 1,
+    flowFrameName = "remove_doublets_obj",
+    path = resultsDir,
+    xChannelLabel = "FSC-A : NA",
+    yChannelLabel = "SSC-A : NA",
+    useAllCells = TRUE,
+    useFixedLinearRange = TRUE,
+    linearRange = c(-111, 262144))
+    
+p2 <- CytoPipelineGUI::plotSelectedFlowFrame(
+    experimentName = expName,
+    whichQueue = "pre-processing",
+    sampleFile = 1,
+    flowFrameName = "remove_debris_obj",
+    path = resultsDir,
+    xChannelLabel = "FSC-A : NA",
+    yChannelLabel = "SSC-A : NA",
+    useAllCells = TRUE,
+    useFixedLinearRange = TRUE,
+    linearRange = c(-111, 262144))
+    
+p3 <- CytoPipelineGUI::plotDiffFlowFrame(
+    path = resultsDir,
+    experimentNameFrom = expName,
+    whichQueueFrom = "pre-processing",
+    sampleFileFrom = 1,
+    flowFrameNameFrom = "remove_doublets_obj",
+    xChannelLabelFrom = "FSC-A : NA",
+    yChannelLabelFrom = "SSC-A : NA",
+    experimentNameTo = expName,
+    whichQueueTo = "pre-processing",
+    sampleFileTo = 1,
+    flowFrameNameTo = "remove_debris_obj",
+    xChannelLabelTo = "FSC-A : NA",
+    yChannelLabelTo = "SSC-A : NA",
+    useAllCells = TRUE,
+    useFixedLinearRange = TRUE,
+    linearRange = c(-111, 262144))
+
+ print(p1+p2+p3)
+
+}
+
+```
+
+### Running the same pipeline with different function parameters
+
+In order to cope with the issue of the `remove_debris`step, we create a new
+pipeline with the same steps, only we use `nClust = 2` instead of `nClust = 3` 
+as the number of clusters to be found during this step. We run this amended 
+version of the pipeline under a new experiment name, in order to allow for
+visual comparison of results between the two versions.
+
+```{r step3:nClust-2, out.height=450, out.width=600, fig.height=4.5, fig.width=6, fig.align='center'}
 
 # 3.
 
 # create pipeline with nClust = 2
 
-expName <- "HBVT_Demo_2C"
+expName <- "CytoPipeline_Demo_2C"
 
-jsonFile <- ("CytoPipeline_Demo_pipeline3.json")
+jsonFile <- ("CytoPipeline_Demo_pipeline_2C.json")
 
 pipL2 <- CytoPipeline(jsonFile,
                       experimentName = expName,
                       sampleFiles = mySamples)
 
-plotCytoPipelineProcessingQueue(pipL2, 
-                                whichQueue = "pre-processing",
-                                path = resultsDir,
-                                sampleFile = 1)
-
-```
-
-
-
-```{r, step3:execute}
 
 # execute pipeline
 execute(pipL2, path = resultsDir)
@@ -228,9 +465,11 @@ plotCytoPipelineProcessingQueue(pipL2,
                                 sampleFile = 1)
 ```
 
+Now that this pipeline has run until completion, we can now visualize 
+interactively what the `remove_debris` gives as results, 
+with this new `nClust = 2` parameter : 
 
-``` {r, resultsViz}
-
+``` {r, step3::resultsViz}
 
 # launch shiny app
 CytoPipelineGUI::CytoPipelineCheckApp(dir = resultsDir)
@@ -238,14 +477,74 @@ CytoPipelineGUI::CytoPipelineCheckApp(dir = resultsDir)
 ```
 
 
+```{r, step3_viz_prog, out.height=300, out.width=900, fig.height=6, fig.width=18, fig.align='center', echo = FALSE, message = FALSE}
+if (!interactive()) {
+    p1 <- CytoPipelineGUI::plotSelectedFlowFrame(
+        experimentName = expName,
+        whichQueue = "pre-processing",
+        sampleFile = 1, #D91_G01
+        flowFrameName = "remove_doublets_obj",
+        path = resultsDir,
+        xChannelLabel = "FSC-A : NA",
+        yChannelLabel = "SSC-A : NA",
+        useAllCells = TRUE,
+        useFixedLinearRange = TRUE,
+        linearRange = c(-111, 262144))
+    
+    p2 <- CytoPipelineGUI::plotSelectedFlowFrame(
+        experimentName = expName,
+        whichQueue = "pre-processing",
+        sampleFile = 1, #D91_G01
+        flowFrameName = "remove_debris_obj",
+        path = resultsDir,
+        xChannelLabel = "FSC-A : NA",
+        yChannelLabel = "SSC-A : NA",
+        useAllCells = TRUE,
+        useFixedLinearRange = TRUE,
+        linearRange = c(-111, 262144))
+    
+    p3 <- CytoPipelineGUI::plotDiffFlowFrame(
+        path = resultsDir,
+        experimentNameFrom = expName,
+        whichQueueFrom = "pre-processing",
+        sampleFileFrom = 1, #D91_G01
+        flowFrameNameFrom = "remove_doublets_obj",
+        xChannelLabelFrom = "FSC-A : NA",
+        yChannelLabelFrom = "SSC-A : NA",
+        experimentNameTo = expName,
+        whichQueueTo = "pre-processing",
+        sampleFileTo = 1, #D91_G01
+        flowFrameNameTo = "remove_debris_obj",
+        xChannelLabelTo = "FSC-A : NA",
+        yChannelLabelTo = "SSC-A : NA",
+        useAllCells = TRUE,
+        useFixedLinearRange = TRUE,
+        linearRange = c(-111, 262144))
+    
+    print(p1+p2+p3)
+}
+```
+
 ### Comparing pipelines
 
-```{r, step4}
+In this section, we will run the alternative pipeline using *flowAI* as 
+QC in time method. As mentioned in the introduction, this implies a slightly 
+order of the steps as well. The pipeline is described in the following 
+json file:
+
+```{r jsonFileFlowAIShow, comment = ''}
+jsonFile <- ("CytoPipeline_Demo_pipeline_flowAI.json")
+cat(readLines(jsonFile), sep = '\n')
+```
+
+Let us now create a new CytoPipeline object, and execute it.
+
+```{r step4, out.height=450, out.width=600, fig.height=4.5, fig.width=6, fig.align='center'}
 # 4.
 # creation of a new CytoPipeline object,
 # using json file as input (flowAI)
-pipL_flowAI <- CytoPipeline("CytoPipeline_Demo_pipeline_flowAI.json",
-                            experimentName = "HBVT_Demo_flowAI",
+pipL_flowAI <- CytoPipeline(jsonFile,
+                            experimentName = "CytoPipeline_Demo_flowAI",
                             sampleFiles = mySamples)
 
 # display CytoPipeline object
@@ -259,30 +558,115 @@ plotCytoPipelineProcessingQueue(pipL_flowAI,
                                 path = resultsDir,
                                 sampleFile = 1)
 
+```
+
+The pipeline having run until completion, time to visualize the results!
+
+``` {r, step4::resultsViz}
 CytoPipelineGUI::CytoPipelineCheckApp(dir = resultsDir)
 ```
 
+```{r, step4_viz_prog, out.height=300, out.width=900, fig.height=6, fig.width=18, fig.align='center', echo = FALSE, message = FALSE}
+if (!interactive()) {
+    p1 <- CytoPipelineGUI::plotSelectedFlowFrame(
+        experimentName = expName,
+        whichQueue = "pre-processing",
+        sampleFile = 2, # D91_A01
+        flowFrameName = "remove_doublets_obj",
+        path = resultsDir,
+        xChannelLabel = "Time : NA",
+        yChannelLabel = "FSC-A : NA",
+        useAllCells = TRUE,
+        useFixedLinearRange = FALSE)
+    
+    p2 <- CytoPipelineGUI::plotSelectedFlowFrame(
+        experimentName = expName,
+        whichQueue = "pre-processing",
+        sampleFile = 2, # D91_A01
+        flowFrameName = "remove_debris_obj",
+        path = resultsDir,
+        xChannelLabel = "Time : NA",
+        yChannelLabel = "FSC-A : NA",
+        useAllCells = TRUE,
+        useFixedLinearRange = FALSE)
+    
+    p3 <- CytoPipelineGUI::plotDiffFlowFrame(
+        path = resultsDir,
+        experimentNameFrom = expName,
+        whichQueueFrom = "pre-processing",
+        sampleFileFrom = 2, # D91_A01
+        flowFrameNameFrom = "remove_doublets_obj",
+        xChannelLabelFrom = "Time : NA",
+        yChannelLabelFrom = "FSC-A : NA",
+        experimentNameTo = expName,
+        whichQueueTo = "pre-processing",
+        sampleFileTo = 2,
+        flowFrameNameTo = "remove_debris_obj",
+        xChannelLabelTo = "Time : NA",
+        yChannelLabelTo = "FSC-A : NA",
+        useAllCells = TRUE,
+        useFixedLinearRange = FALSE)
+    
+    print(p1+p2+p3)
+}
+```
 
-### Some technical flags
+## Visualization of scale transformations
 
-#### Cleaning the cache before running
+Besides the flowFrame comparison tool, *CytoPipelineGUI* provides another 
+shiny app, which allows to interactively visualize and manage 
+the scale transformations that are generated as part of our prep-processing 
+pipelines.  
 
-```{r, step5a}
-# 5a. execute pipeline with rmCache = TRUE
+If the shape of the scale transformations that were automatically set by the
+chosen algorithm appears to be non satisfactory, it is possible, using this
+shiny application, to manually adjust the parameters of the transformation,
+and save the results in a RDS object. This object can then be re-used in another
+pipeline instance.
 
-plotCytoPipelineProcessingQueue(pipL_flowAI, 
-                                whichQueue = "pre-processing",
-                                path = resultsDir,
-                                sampleFile = 1)
+```{r, step5}
+# 5. show scale transformations
+CytoPipelineGUI::ScaleTransformApp(dir = resultsDir)
+```
 
+## Some technical options to fine-tune pipeline execution
+
+To end up with this workshop, let us experiment with some technical options
+that are available to fine-tune the pipeline execution.
+
+### Cleaning the results cache before running
+
+We have mentioned earlier that the results produced at each step are stored
+in a cache, allowing for further visual assessment. This cache is built thanks 
+to the Bioconductor package `BiocFileCache`.
+
+As a matter of fact, this caching mechanism also allows to re-use previously 
+obtained results in case of a re-run, because by default, the cache will not 
+be erased before running again the pipeline. 
+
+However, it could be useful in some cases to erase the cache 
+prior to running. This can for example happen when re-running the pipeline 
+with the same experiment id, but with an amended pipeline definition.
+
+For this, the `rmCache` parameter of the `execute()` function can be set to 
+`TRUE`.
+
+```{r, step6a}
+# 6a. execute pipeline with rmCache = TRUE
 
 execute(pipL_flowAI, path = resultsDir, rmCache = TRUE)
 ```
 
-#### Running sample files in parallel
+### Running sample files in parallel
 
-```{r, step5b}
-# 5b. execute pipeline in parallel
+Another very useful feature, especially when dealing with a large number 
+of samples, is the ability to run the pipeline in parallel for the different
+samples. To implement this feature, *CytoPipeline* makes use 
+of the Bioconductor *BiocParallel* package, so that the most appropriate 
+backend (MulticoreParams, SnowParam,... ) can be used.
+
+```{r, step6b}
+# 6b. execute pipeline in parallel
 bp <- BiocParallel::SnowParam(progressbar = TRUE)
 
 execute(pipL_flowAI, path = resultsDir, rmCache = TRUE, useBiocParallel = TRUE,
@@ -291,13 +675,12 @@ execute(pipL_flowAI, path = resultsDir, rmCache = TRUE, useBiocParallel = TRUE,
                                                         "CytoPipelineUtils")))
 ```
 
-### Visualization of scale transformations
 
-```{r, step6}
-# 6. show scale transformations
-CytoPipelineGUI::ScaleTransformApp(dir = resultsDir)
+# Session information {-}
+
+```{r sessioninfo, echo=FALSE}
+sessionInfo()
 ```
-
 
 # References
 
