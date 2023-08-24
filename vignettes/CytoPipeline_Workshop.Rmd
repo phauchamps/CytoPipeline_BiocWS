@@ -92,7 +92,7 @@ Automated analysis of cytometry data can be schematically split into different
 big parts, as is shown in Figure 1. 
 
 ```{r highLevelWorkflowDisplay, results='markup', fig.cap="Fig. 1: high level workflow for cytometry data analysis - adapted from (Liechti et al, 2021).", echo=FALSE, out.width='75%', fig.align='center', fig.wide = TRUE}
-knitr::include_graphics("figs/FCDataAnalysis_OverallWorkflow.png", error = FALSE)
+knitr::include_graphics("figs/FCDataAnalysisOverallWorkflow.png", error = FALSE)
 ```
 
 The `CytoPipeline` packages suite is aimed at facilitating the design and 
