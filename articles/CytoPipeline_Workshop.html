@@ -219,22 +219,18 @@ debris, doublets and dead cells.</p>
 <div class="section level4">
 <h4 id="the-example-dataset">The example dataset<a class="anchor" aria-label="anchor" href="#the-example-dataset"></a>
 </h4>
-<p>In order to demonstrate CytoPipeline usage, we will use of an example
-dataset, the <em>HBV mouse dataset</em>. This dataset was collected
-during a preclinical study aimed at assessing the effect of different
-therapeutic vaccine regimens on the immune response of Hepatitis B Virus
-transduced mice.</p>
-<p>In short, 55 mice, split in 5 different experimental groups,
-according to their vaccine regimen or HBV transduction status, were
-immunized at different timepoints. Upon sacrifice, liver tissue sample
-fragments were collected, treated as to isolate the lymphocytes cell
-population, and subsequently analysed in a flow cytometer for
-immuno-phenotyping. This experiment resulted in the acquisition of 55
-<code>fcs</code> raw data file, with a flow cytometry panel of 12
-different channels.</p>
-<p>Here we will work on a small subset of this dataset, containing two
-samples, respectively labelled <em>D91_A01</em> and
-<em>D93_C01</em>.</p>
+<p>The example dataset that will be used throughout this vignette is
+derived from a reference public dataset accompanying the OMIP-021
+(Optimized Multicolor Immunofluorescence Panel 021) article (Gherardin
+et al, 2014).</p>
+<p>A sub-sample of this public dataset, with 2 <em>fcs</em> files
+containing measurements of 16 markers for 5,000 events each, is built-in
+in the <code>CytoPipeline</code> package, as the <em>OMIP021</em>
+dataset.</p>
+<p>See the <code>MakeOMIP021Samples.R</code> script for more details on
+how the <code>OMIP021</code> dataset was created. This script is to be
+found in the <code>script</code> subdirectory in the
+<code>CytoPipeline</code> package installation path.</p>
 </div>
 <div class="section level4">
 <h4 id="target-pipelines">Target pipelines<a class="anchor" aria-label="anchor" href="#target-pipelines"></a>
@@ -360,9 +356,9 @@ object.</p>
 </h4>
 <p>However, the easiest, and most concise way to define a
 <em>CytoPipeline</em> object is by using a json file. Here we will use
-the following input file, which specifies the <em>PeacoQC</em> pipeline
+the following input file, which specifies the <em>flowAI</em> pipeline
 as described above.</p>
-<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a>jsonFile <span class="ot">&lt;-</span> (<span class="st">"CytoPipeline_Demo_pipeline.json"</span>)</span>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a>jsonFile <span class="ot">&lt;-</span> (<span class="st">"CytoPipeline_Demo_fAI.json"</span>)</span>
 <span id="cb2-2"><a href="#cb2-2" tabindex="-1"></a><span class="fu">cat</span>(<span class="fu">readLines</span>(jsonFile), <span class="at">sep =</span> <span class="st">'</span><span class="sc">\n</span><span class="st">'</span>)</span>
 <span id="cb2-3"><a href="#cb2-3" tabindex="-1"></a>{</span>
 <span id="cb2-4"><a href="#cb2-4" tabindex="-1"></a>  <span class="st">"scaleTransformProcessingSteps"</span><span class="sc">:</span> [</span>
@@ -378,94 +374,108 @@ as described above.</p>
 <span id="cb2-14"><a href="#cb2-14" tabindex="-1"></a>    {</span>
 <span id="cb2-15"><a href="#cb2-15" tabindex="-1"></a>      <span class="st">"name"</span><span class="sc">:</span> [<span class="st">"remove_margins"</span>],</span>
 <span id="cb2-16"><a href="#cb2-16" tabindex="-1"></a>      <span class="st">"FUN"</span><span class="sc">:</span> [<span class="st">"removeMarginsPeacoQC"</span>],</span>
-<span id="cb2-17"><a href="#cb2-17" tabindex="-1"></a>      <span class="st">"ARGS"</span><span class="sc">:</span> []</span>
-<span id="cb2-18"><a href="#cb2-18" tabindex="-1"></a>    },</span>
-<span id="cb2-19"><a href="#cb2-19" tabindex="-1"></a>    {</span>
-<span id="cb2-20"><a href="#cb2-20" tabindex="-1"></a>      <span class="st">"name"</span><span class="sc">:</span> [<span class="st">"compensate"</span>],</span>
-<span id="cb2-21"><a href="#cb2-21" tabindex="-1"></a>      <span class="st">"FUN"</span><span class="sc">:</span> [<span class="st">"compensateFromMatrix"</span>],</span>
-<span id="cb2-22"><a href="#cb2-22" tabindex="-1"></a>      <span class="st">"ARGS"</span><span class="sc">:</span> {</span>
-<span id="cb2-23"><a href="#cb2-23" tabindex="-1"></a>        <span class="st">"matrixSource"</span><span class="sc">:</span> [<span class="st">"fcs"</span>]</span>
-<span id="cb2-24"><a href="#cb2-24" tabindex="-1"></a>      }</span>
-<span id="cb2-25"><a href="#cb2-25" tabindex="-1"></a>    },</span>
-<span id="cb2-26"><a href="#cb2-26" tabindex="-1"></a>    {</span>
-<span id="cb2-27"><a href="#cb2-27" tabindex="-1"></a>      <span class="st">"name"</span><span class="sc">:</span> [<span class="st">"flowframe_aggregate"</span>],</span>
-<span id="cb2-28"><a href="#cb2-28" tabindex="-1"></a>      <span class="st">"FUN"</span><span class="sc">:</span> [<span class="st">"aggregateAndSample"</span>],</span>
-<span id="cb2-29"><a href="#cb2-29" tabindex="-1"></a>      <span class="st">"ARGS"</span><span class="sc">:</span> {</span>
-<span id="cb2-30"><a href="#cb2-30" tabindex="-1"></a>        <span class="st">"nTotalEvents"</span><span class="sc">:</span> [<span class="dv">10000</span>],</span>
-<span id="cb2-31"><a href="#cb2-31" tabindex="-1"></a>        <span class="st">"seed"</span><span class="sc">:</span> [<span class="dv">0</span>]</span>
-<span id="cb2-32"><a href="#cb2-32" tabindex="-1"></a>      }</span>
-<span id="cb2-33"><a href="#cb2-33" tabindex="-1"></a>    },</span>
-<span id="cb2-34"><a href="#cb2-34" tabindex="-1"></a>    {</span>
-<span id="cb2-35"><a href="#cb2-35" tabindex="-1"></a>      <span class="st">"name"</span><span class="sc">:</span> [<span class="st">"scale_transform_estimate"</span>],</span>
-<span id="cb2-36"><a href="#cb2-36" tabindex="-1"></a>      <span class="st">"FUN"</span><span class="sc">:</span> [<span class="st">"estimateScaleTransforms"</span>],</span>
-<span id="cb2-37"><a href="#cb2-37" tabindex="-1"></a>      <span class="st">"ARGS"</span><span class="sc">:</span> {</span>
-<span id="cb2-38"><a href="#cb2-38" tabindex="-1"></a>        <span class="st">"fluoMethod"</span><span class="sc">:</span> [<span class="st">"estimateLogicle"</span>],</span>
-<span id="cb2-39"><a href="#cb2-39" tabindex="-1"></a>        <span class="st">"scatterMethod"</span><span class="sc">:</span> [<span class="st">"linearQuantile"</span>],</span>
-<span id="cb2-40"><a href="#cb2-40" tabindex="-1"></a>        <span class="st">"scatterRefMarker"</span><span class="sc">:</span> [<span class="st">"CD4"</span>]</span>
-<span id="cb2-41"><a href="#cb2-41" tabindex="-1"></a>      }</span>
-<span id="cb2-42"><a href="#cb2-42" tabindex="-1"></a>    }</span>
-<span id="cb2-43"><a href="#cb2-43" tabindex="-1"></a>  ],</span>
-<span id="cb2-44"><a href="#cb2-44" tabindex="-1"></a>  <span class="st">"flowFramesPreProcessingSteps"</span><span class="sc">:</span> [</span>
-<span id="cb2-45"><a href="#cb2-45" tabindex="-1"></a>    {</span>
-<span id="cb2-46"><a href="#cb2-46" tabindex="-1"></a>      <span class="st">"name"</span><span class="sc">:</span> [<span class="st">"flowframe_read"</span>],</span>
-<span id="cb2-47"><a href="#cb2-47" tabindex="-1"></a>      <span class="st">"FUN"</span><span class="sc">:</span> [<span class="st">"readSampleFiles"</span>],</span>
-<span id="cb2-48"><a href="#cb2-48" tabindex="-1"></a>      <span class="st">"ARGS"</span><span class="sc">:</span> {</span>
-<span id="cb2-49"><a href="#cb2-49" tabindex="-1"></a>        <span class="st">"truncate_max_range"</span><span class="sc">:</span> [false],</span>
-<span id="cb2-50"><a href="#cb2-50" tabindex="-1"></a>        <span class="st">"min.limit"</span><span class="sc">:</span> null</span>
-<span id="cb2-51"><a href="#cb2-51" tabindex="-1"></a>      }</span>
-<span id="cb2-52"><a href="#cb2-52" tabindex="-1"></a>    }, </span>
-<span id="cb2-53"><a href="#cb2-53" tabindex="-1"></a>    {</span>
-<span id="cb2-54"><a href="#cb2-54" tabindex="-1"></a>      <span class="st">"name"</span><span class="sc">:</span> [<span class="st">"remove_margins"</span>],</span>
-<span id="cb2-55"><a href="#cb2-55" tabindex="-1"></a>      <span class="st">"FUN"</span><span class="sc">:</span> [<span class="st">"removeMarginsPeacoQC"</span>],</span>
-<span id="cb2-56"><a href="#cb2-56" tabindex="-1"></a>      <span class="st">"ARGS"</span><span class="sc">:</span> {</span>
-<span id="cb2-57"><a href="#cb2-57" tabindex="-1"></a>        <span class="st">"channelSpecifications"</span><span class="sc">:</span> {</span>
-<span id="cb2-58"><a href="#cb2-58" tabindex="-1"></a>          <span class="st">"AllFluoChannels"</span><span class="sc">:</span> [<span class="sc">-</span><span class="dv">300</span>, <span class="dv">262144</span>]</span>
-<span id="cb2-59"><a href="#cb2-59" tabindex="-1"></a>        }</span>
-<span id="cb2-60"><a href="#cb2-60" tabindex="-1"></a>      }</span>
-<span id="cb2-61"><a href="#cb2-61" tabindex="-1"></a>    },  </span>
-<span id="cb2-62"><a href="#cb2-62" tabindex="-1"></a>    {</span>
-<span id="cb2-63"><a href="#cb2-63" tabindex="-1"></a>      <span class="st">"name"</span><span class="sc">:</span> [<span class="st">"remove_doublets"</span>],</span>
-<span id="cb2-64"><a href="#cb2-64" tabindex="-1"></a>      <span class="st">"FUN"</span><span class="sc">:</span> [<span class="st">"removeDoubletsCytoPipeline"</span>],</span>
-<span id="cb2-65"><a href="#cb2-65" tabindex="-1"></a>      <span class="st">"ARGS"</span><span class="sc">:</span> {</span>
-<span id="cb2-66"><a href="#cb2-66" tabindex="-1"></a>        <span class="st">"areaChannels"</span><span class="sc">:</span> [<span class="st">"FSC-A"</span>],</span>
-<span id="cb2-67"><a href="#cb2-67" tabindex="-1"></a>        <span class="st">"heightChannels"</span><span class="sc">:</span> [<span class="st">"FSC-H"</span>],</span>
-<span id="cb2-68"><a href="#cb2-68" tabindex="-1"></a>        <span class="st">"nmads"</span><span class="sc">:</span> [<span class="dv">3</span>]</span>
-<span id="cb2-69"><a href="#cb2-69" tabindex="-1"></a>      }</span>
-<span id="cb2-70"><a href="#cb2-70" tabindex="-1"></a>    },</span>
-<span id="cb2-71"><a href="#cb2-71" tabindex="-1"></a>    {</span>
-<span id="cb2-72"><a href="#cb2-72" tabindex="-1"></a>      <span class="st">"name"</span><span class="sc">:</span> [<span class="st">"remove_debris"</span>],</span>
-<span id="cb2-73"><a href="#cb2-73" tabindex="-1"></a>      <span class="st">"FUN"</span><span class="sc">:</span> [<span class="st">"removeDebrisFlowClustTmix"</span>],</span>
-<span id="cb2-74"><a href="#cb2-74" tabindex="-1"></a>      <span class="st">"ARGS"</span><span class="sc">:</span> {</span>
-<span id="cb2-75"><a href="#cb2-75" tabindex="-1"></a>        <span class="st">"FSCChannel"</span><span class="sc">:</span> [<span class="st">"FSC-A"</span>],</span>
-<span id="cb2-76"><a href="#cb2-76" tabindex="-1"></a>        <span class="st">"SSCChannel"</span><span class="sc">:</span> [<span class="st">"SSC-A"</span>],</span>
-<span id="cb2-77"><a href="#cb2-77" tabindex="-1"></a>        <span class="st">"nClusters"</span><span class="sc">:</span> [<span class="dv">3</span>],</span>
-<span id="cb2-78"><a href="#cb2-78" tabindex="-1"></a>        <span class="st">"level"</span><span class="sc">:</span> [<span class="fl">0.97</span>],</span>
-<span id="cb2-79"><a href="#cb2-79" tabindex="-1"></a>        <span class="st">"B"</span><span class="sc">:</span> [<span class="dv">100</span>]}</span>
-<span id="cb2-80"><a href="#cb2-80" tabindex="-1"></a>    },</span>
-<span id="cb2-81"><a href="#cb2-81" tabindex="-1"></a>    {</span>
-<span id="cb2-82"><a href="#cb2-82" tabindex="-1"></a>      <span class="st">"name"</span><span class="sc">:</span> [<span class="st">"compensate"</span>],</span>
-<span id="cb2-83"><a href="#cb2-83" tabindex="-1"></a>      <span class="st">"FUN"</span><span class="sc">:</span> [<span class="st">"compensateFromMatrix"</span>],</span>
-<span id="cb2-84"><a href="#cb2-84" tabindex="-1"></a>      <span class="st">"ARGS"</span><span class="sc">:</span> {</span>
-<span id="cb2-85"><a href="#cb2-85" tabindex="-1"></a>        <span class="st">"matrixSource"</span><span class="sc">:</span> [<span class="st">"fcs"</span>]</span>
-<span id="cb2-86"><a href="#cb2-86" tabindex="-1"></a>      }</span>
-<span id="cb2-87"><a href="#cb2-87" tabindex="-1"></a>    },</span>
-<span id="cb2-88"><a href="#cb2-88" tabindex="-1"></a>    {</span>
-<span id="cb2-89"><a href="#cb2-89" tabindex="-1"></a>      <span class="st">"name"</span><span class="sc">:</span> [<span class="st">"perform_QC"</span>],</span>
-<span id="cb2-90"><a href="#cb2-90" tabindex="-1"></a>      <span class="st">"FUN"</span><span class="sc">:</span> [<span class="st">"qualityControlPeacoQC"</span>],</span>
-<span id="cb2-91"><a href="#cb2-91" tabindex="-1"></a>      <span class="st">"ARGS"</span><span class="sc">:</span> {</span>
-<span id="cb2-92"><a href="#cb2-92" tabindex="-1"></a>        <span class="st">"preTransform"</span><span class="sc">:</span> [true],</span>
-<span id="cb2-93"><a href="#cb2-93" tabindex="-1"></a>        <span class="st">"min_cells"</span><span class="sc">:</span> [<span class="dv">150</span>],</span>
-<span id="cb2-94"><a href="#cb2-94" tabindex="-1"></a>        <span class="st">"max_bins"</span><span class="sc">:</span> [<span class="dv">500</span>],</span>
-<span id="cb2-95"><a href="#cb2-95" tabindex="-1"></a>        <span class="st">"step"</span><span class="sc">:</span> [<span class="dv">500</span>],</span>
-<span id="cb2-96"><a href="#cb2-96" tabindex="-1"></a>        <span class="st">"MAD"</span><span class="sc">:</span> [<span class="dv">6</span>],</span>
-<span id="cb2-97"><a href="#cb2-97" tabindex="-1"></a>        <span class="st">"IT_limit"</span><span class="sc">:</span> [<span class="fl">0.55</span>],</span>
-<span id="cb2-98"><a href="#cb2-98" tabindex="-1"></a>        <span class="st">"force_IT"</span><span class="sc">:</span> [<span class="dv">150</span>],</span>
-<span id="cb2-99"><a href="#cb2-99" tabindex="-1"></a>        <span class="st">"peak_removal"</span><span class="sc">:</span> [<span class="fl">0.3333</span>],</span>
-<span id="cb2-100"><a href="#cb2-100" tabindex="-1"></a>        <span class="st">"min_nr_bins_peakdetection"</span><span class="sc">:</span> [<span class="dv">10</span>]</span>
-<span id="cb2-101"><a href="#cb2-101" tabindex="-1"></a>      }</span>
-<span id="cb2-102"><a href="#cb2-102" tabindex="-1"></a>    }   </span>
-<span id="cb2-103"><a href="#cb2-103" tabindex="-1"></a>  ]  </span>
-<span id="cb2-104"><a href="#cb2-104" tabindex="-1"></a>} </span></code></pre></div>
+<span id="cb2-17"><a href="#cb2-17" tabindex="-1"></a>      <span class="st">"ARGS"</span><span class="sc">:</span> {</span>
+<span id="cb2-18"><a href="#cb2-18" tabindex="-1"></a>        <span class="st">"channelSpecifications"</span><span class="sc">:</span> {</span>
+<span id="cb2-19"><a href="#cb2-19" tabindex="-1"></a>          <span class="st">"AllFluoChannels"</span><span class="sc">:</span> [<span class="sc">-</span><span class="dv">300</span>, <span class="dv">262144</span>]</span>
+<span id="cb2-20"><a href="#cb2-20" tabindex="-1"></a>        }</span>
+<span id="cb2-21"><a href="#cb2-21" tabindex="-1"></a>      }</span>
+<span id="cb2-22"><a href="#cb2-22" tabindex="-1"></a>    },</span>
+<span id="cb2-23"><a href="#cb2-23" tabindex="-1"></a>    {</span>
+<span id="cb2-24"><a href="#cb2-24" tabindex="-1"></a>      <span class="st">"name"</span><span class="sc">:</span> [<span class="st">"compensate"</span>],</span>
+<span id="cb2-25"><a href="#cb2-25" tabindex="-1"></a>      <span class="st">"FUN"</span><span class="sc">:</span> [<span class="st">"compensateFromMatrix"</span>],</span>
+<span id="cb2-26"><a href="#cb2-26" tabindex="-1"></a>      <span class="st">"ARGS"</span><span class="sc">:</span> {</span>
+<span id="cb2-27"><a href="#cb2-27" tabindex="-1"></a>        <span class="st">"matrixSource"</span><span class="sc">:</span> [<span class="st">"fcs"</span>]</span>
+<span id="cb2-28"><a href="#cb2-28" tabindex="-1"></a>      }</span>
+<span id="cb2-29"><a href="#cb2-29" tabindex="-1"></a>    },</span>
+<span id="cb2-30"><a href="#cb2-30" tabindex="-1"></a>    {</span>
+<span id="cb2-31"><a href="#cb2-31" tabindex="-1"></a>      <span class="st">"name"</span><span class="sc">:</span> [<span class="st">"flowframe_aggregate"</span>],</span>
+<span id="cb2-32"><a href="#cb2-32" tabindex="-1"></a>      <span class="st">"FUN"</span><span class="sc">:</span> [<span class="st">"aggregateAndSample"</span>],</span>
+<span id="cb2-33"><a href="#cb2-33" tabindex="-1"></a>      <span class="st">"ARGS"</span><span class="sc">:</span> {</span>
+<span id="cb2-34"><a href="#cb2-34" tabindex="-1"></a>        <span class="st">"nTotalEvents"</span><span class="sc">:</span> [<span class="dv">10000</span>],</span>
+<span id="cb2-35"><a href="#cb2-35" tabindex="-1"></a>        <span class="st">"seed"</span><span class="sc">:</span> [<span class="dv">0</span>]</span>
+<span id="cb2-36"><a href="#cb2-36" tabindex="-1"></a>      }</span>
+<span id="cb2-37"><a href="#cb2-37" tabindex="-1"></a>    },</span>
+<span id="cb2-38"><a href="#cb2-38" tabindex="-1"></a>    {</span>
+<span id="cb2-39"><a href="#cb2-39" tabindex="-1"></a>      <span class="st">"name"</span><span class="sc">:</span> [<span class="st">"scale_transform_estimate"</span>],</span>
+<span id="cb2-40"><a href="#cb2-40" tabindex="-1"></a>      <span class="st">"FUN"</span><span class="sc">:</span> [<span class="st">"estimateScaleTransforms"</span>],</span>
+<span id="cb2-41"><a href="#cb2-41" tabindex="-1"></a>      <span class="st">"ARGS"</span><span class="sc">:</span> {</span>
+<span id="cb2-42"><a href="#cb2-42" tabindex="-1"></a>        <span class="st">"fluoMethod"</span><span class="sc">:</span> [<span class="st">"estimateLogicle"</span>],</span>
+<span id="cb2-43"><a href="#cb2-43" tabindex="-1"></a>        <span class="st">"scatterMethod"</span><span class="sc">:</span> [<span class="st">"linearQuantile"</span>],</span>
+<span id="cb2-44"><a href="#cb2-44" tabindex="-1"></a>        <span class="st">"scatterRefMarker"</span><span class="sc">:</span> [<span class="st">"CD4"</span>]</span>
+<span id="cb2-45"><a href="#cb2-45" tabindex="-1"></a>      }</span>
+<span id="cb2-46"><a href="#cb2-46" tabindex="-1"></a>    }</span>
+<span id="cb2-47"><a href="#cb2-47" tabindex="-1"></a>  ],  </span>
+<span id="cb2-48"><a href="#cb2-48" tabindex="-1"></a>  <span class="st">"flowFramesPreProcessingSteps"</span><span class="sc">:</span> [</span>
+<span id="cb2-49"><a href="#cb2-49" tabindex="-1"></a>    {</span>
+<span id="cb2-50"><a href="#cb2-50" tabindex="-1"></a>      <span class="st">"name"</span><span class="sc">:</span> [<span class="st">"flowframe_read"</span>],</span>
+<span id="cb2-51"><a href="#cb2-51" tabindex="-1"></a>      <span class="st">"FUN"</span><span class="sc">:</span> [<span class="st">"readSampleFiles"</span>],</span>
+<span id="cb2-52"><a href="#cb2-52" tabindex="-1"></a>      <span class="st">"ARGS"</span><span class="sc">:</span> {</span>
+<span id="cb2-53"><a href="#cb2-53" tabindex="-1"></a>        <span class="st">"truncate_max_range"</span><span class="sc">:</span> [false],</span>
+<span id="cb2-54"><a href="#cb2-54" tabindex="-1"></a>        <span class="st">"min.limit"</span><span class="sc">:</span> null</span>
+<span id="cb2-55"><a href="#cb2-55" tabindex="-1"></a>      }</span>
+<span id="cb2-56"><a href="#cb2-56" tabindex="-1"></a>    }, </span>
+<span id="cb2-57"><a href="#cb2-57" tabindex="-1"></a>    {</span>
+<span id="cb2-58"><a href="#cb2-58" tabindex="-1"></a>      <span class="st">"name"</span><span class="sc">:</span> [<span class="st">"remove_margins"</span>],</span>
+<span id="cb2-59"><a href="#cb2-59" tabindex="-1"></a>      <span class="st">"FUN"</span><span class="sc">:</span> [<span class="st">"removeMarginsPeacoQC"</span>],</span>
+<span id="cb2-60"><a href="#cb2-60" tabindex="-1"></a>      <span class="st">"ARGS"</span><span class="sc">:</span> {</span>
+<span id="cb2-61"><a href="#cb2-61" tabindex="-1"></a>        <span class="st">"channelSpecifications"</span><span class="sc">:</span> {</span>
+<span id="cb2-62"><a href="#cb2-62" tabindex="-1"></a>          <span class="st">"AllFluoChannels"</span><span class="sc">:</span> [<span class="sc">-</span><span class="dv">300</span>, <span class="dv">262144</span>]</span>
+<span id="cb2-63"><a href="#cb2-63" tabindex="-1"></a>        }</span>
+<span id="cb2-64"><a href="#cb2-64" tabindex="-1"></a>      }</span>
+<span id="cb2-65"><a href="#cb2-65" tabindex="-1"></a>    },  </span>
+<span id="cb2-66"><a href="#cb2-66" tabindex="-1"></a>    {</span>
+<span id="cb2-67"><a href="#cb2-67" tabindex="-1"></a>      <span class="st">"name"</span><span class="sc">:</span> [<span class="st">"perform_QC"</span>],</span>
+<span id="cb2-68"><a href="#cb2-68" tabindex="-1"></a>      <span class="st">"FUN"</span><span class="sc">:</span> [<span class="st">"qualityControlFlowAI"</span>],</span>
+<span id="cb2-69"><a href="#cb2-69" tabindex="-1"></a>      <span class="st">"ARGS"</span><span class="sc">:</span> {       </span>
+<span id="cb2-70"><a href="#cb2-70" tabindex="-1"></a>        <span class="st">"preTransform"</span><span class="sc">:</span> [false],</span>
+<span id="cb2-71"><a href="#cb2-71" tabindex="-1"></a>        <span class="st">"remove_from"</span><span class="sc">:</span> [<span class="st">"all"</span>],</span>
+<span id="cb2-72"><a href="#cb2-72" tabindex="-1"></a>        <span class="st">"second_fractionFR"</span><span class="sc">:</span> [<span class="fl">0.1</span>],</span>
+<span id="cb2-73"><a href="#cb2-73" tabindex="-1"></a>        <span class="st">"deviationFR"</span><span class="sc">:</span> [<span class="st">"MAD"</span>],</span>
+<span id="cb2-74"><a href="#cb2-74" tabindex="-1"></a>        <span class="st">"alphaFR"</span><span class="sc">:</span> [<span class="fl">0.01</span>],</span>
+<span id="cb2-75"><a href="#cb2-75" tabindex="-1"></a>        <span class="st">"decompFR"</span><span class="sc">:</span> [true],</span>
+<span id="cb2-76"><a href="#cb2-76" tabindex="-1"></a>        <span class="st">"outlier_binsFS"</span><span class="sc">:</span> [false],</span>
+<span id="cb2-77"><a href="#cb2-77" tabindex="-1"></a>        <span class="st">"pen_valueFS"</span><span class="sc">:</span> [<span class="dv">200</span>],</span>
+<span id="cb2-78"><a href="#cb2-78" tabindex="-1"></a>        <span class="st">"max_cptFS"</span><span class="sc">:</span> [<span class="dv">3</span>],</span>
+<span id="cb2-79"><a href="#cb2-79" tabindex="-1"></a>        <span class="st">"sideFM"</span><span class="sc">:</span> [<span class="st">"both"</span>],</span>
+<span id="cb2-80"><a href="#cb2-80" tabindex="-1"></a>        <span class="st">"neg_valuesFM"</span><span class="sc">:</span> [<span class="dv">1</span>]</span>
+<span id="cb2-81"><a href="#cb2-81" tabindex="-1"></a>      }</span>
+<span id="cb2-82"><a href="#cb2-82" tabindex="-1"></a>    },</span>
+<span id="cb2-83"><a href="#cb2-83" tabindex="-1"></a>    {</span>
+<span id="cb2-84"><a href="#cb2-84" tabindex="-1"></a>      <span class="st">"name"</span><span class="sc">:</span> [<span class="st">"compensate"</span>],</span>
+<span id="cb2-85"><a href="#cb2-85" tabindex="-1"></a>      <span class="st">"FUN"</span><span class="sc">:</span> [<span class="st">"compensateFromMatrix"</span>],</span>
+<span id="cb2-86"><a href="#cb2-86" tabindex="-1"></a>      <span class="st">"ARGS"</span><span class="sc">:</span> {</span>
+<span id="cb2-87"><a href="#cb2-87" tabindex="-1"></a>        <span class="st">"matrixSource"</span><span class="sc">:</span> [<span class="st">"fcs"</span>]</span>
+<span id="cb2-88"><a href="#cb2-88" tabindex="-1"></a>      }</span>
+<span id="cb2-89"><a href="#cb2-89" tabindex="-1"></a>    },</span>
+<span id="cb2-90"><a href="#cb2-90" tabindex="-1"></a>    {</span>
+<span id="cb2-91"><a href="#cb2-91" tabindex="-1"></a>      <span class="st">"name"</span><span class="sc">:</span> [<span class="st">"remove_doublets"</span>],</span>
+<span id="cb2-92"><a href="#cb2-92" tabindex="-1"></a>      <span class="st">"FUN"</span><span class="sc">:</span> [<span class="st">"removeDoubletsCytoPipeline"</span>],</span>
+<span id="cb2-93"><a href="#cb2-93" tabindex="-1"></a>      <span class="st">"ARGS"</span><span class="sc">:</span> {</span>
+<span id="cb2-94"><a href="#cb2-94" tabindex="-1"></a>        <span class="st">"areaChannels"</span><span class="sc">:</span> [<span class="st">"FSC-A"</span>],</span>
+<span id="cb2-95"><a href="#cb2-95" tabindex="-1"></a>        <span class="st">"heightChannels"</span><span class="sc">:</span> [<span class="st">"FSC-H"</span>],</span>
+<span id="cb2-96"><a href="#cb2-96" tabindex="-1"></a>        <span class="st">"nmads"</span><span class="sc">:</span> [<span class="dv">3</span>]</span>
+<span id="cb2-97"><a href="#cb2-97" tabindex="-1"></a>      }</span>
+<span id="cb2-98"><a href="#cb2-98" tabindex="-1"></a>    },</span>
+<span id="cb2-99"><a href="#cb2-99" tabindex="-1"></a>    {</span>
+<span id="cb2-100"><a href="#cb2-100" tabindex="-1"></a>      <span class="st">"name"</span><span class="sc">:</span> [<span class="st">"remove_debris"</span>],</span>
+<span id="cb2-101"><a href="#cb2-101" tabindex="-1"></a>      <span class="st">"FUN"</span><span class="sc">:</span> [<span class="st">"removeDebrisFlowClustTmix"</span>],</span>
+<span id="cb2-102"><a href="#cb2-102" tabindex="-1"></a>      <span class="st">"ARGS"</span><span class="sc">:</span> {</span>
+<span id="cb2-103"><a href="#cb2-103" tabindex="-1"></a>        <span class="st">"FSCChannel"</span><span class="sc">:</span> [<span class="st">"FSC-A"</span>],</span>
+<span id="cb2-104"><a href="#cb2-104" tabindex="-1"></a>        <span class="st">"SSCChannel"</span><span class="sc">:</span> [<span class="st">"SSC-A"</span>],</span>
+<span id="cb2-105"><a href="#cb2-105" tabindex="-1"></a>        <span class="st">"nClusters"</span><span class="sc">:</span> [<span class="dv">2</span>],</span>
+<span id="cb2-106"><a href="#cb2-106" tabindex="-1"></a>        <span class="st">"level"</span><span class="sc">:</span> [<span class="fl">0.97</span>],</span>
+<span id="cb2-107"><a href="#cb2-107" tabindex="-1"></a>        <span class="st">"B"</span><span class="sc">:</span> [<span class="dv">100</span>]}</span>
+<span id="cb2-108"><a href="#cb2-108" tabindex="-1"></a>    },</span>
+<span id="cb2-109"><a href="#cb2-109" tabindex="-1"></a>    {</span>
+<span id="cb2-110"><a href="#cb2-110" tabindex="-1"></a>      <span class="st">"name"</span><span class="sc">:</span> [<span class="st">"remove_dead_cells"</span>],</span>
+<span id="cb2-111"><a href="#cb2-111" tabindex="-1"></a>      <span class="st">"FUN"</span><span class="sc">:</span> [<span class="st">"removeDeadCellsDeGate"</span>],</span>
+<span id="cb2-112"><a href="#cb2-112" tabindex="-1"></a>      <span class="st">"ARGS"</span><span class="sc">:</span> {</span>
+<span id="cb2-113"><a href="#cb2-113" tabindex="-1"></a>        <span class="st">"preTransform"</span><span class="sc">:</span> [true],</span>
+<span id="cb2-114"><a href="#cb2-114" tabindex="-1"></a>        <span class="st">"LDMarker"</span><span class="sc">:</span> [<span class="st">"L/D Aqua - Viability"</span>]</span>
+<span id="cb2-115"><a href="#cb2-115" tabindex="-1"></a>      }</span>
+<span id="cb2-116"><a href="#cb2-116" tabindex="-1"></a>    }</span>
+<span id="cb2-117"><a href="#cb2-117" tabindex="-1"></a>  ]  </span>
+<span id="cb2-118"><a href="#cb2-118" tabindex="-1"></a>}</span></code></pre></div>
 <p>We now create our <em>CytoPipeline</em> object using this json file
 as input, and print the content of the object again.</p>
 <div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a></span>
@@ -495,70 +505,80 @@ as input, and print the content of the object again.</p>
 <span id="cb3-25"><a href="#cb3-25" tabindex="-1"></a><span class="dv">2</span> <span class="sc">:</span>Object of class <span class="st">"CytoProcessingStep"</span></span>
 <span id="cb3-26"><a href="#cb3-26" tabindex="-1"></a> Name<span class="sc">:</span> remove_margins</span>
 <span id="cb3-27"><a href="#cb3-27" tabindex="-1"></a> Function<span class="sc">:</span> removeMarginsPeacoQC</span>
-<span id="cb3-28"><a href="#cb3-28" tabindex="-1"></a><span class="dv">3</span> <span class="sc">:</span>Object of class <span class="st">"CytoProcessingStep"</span></span>
-<span id="cb3-29"><a href="#cb3-29" tabindex="-1"></a> Name<span class="sc">:</span> compensate</span>
-<span id="cb3-30"><a href="#cb3-30" tabindex="-1"></a> Function<span class="sc">:</span> compensateFromMatrix</span>
-<span id="cb3-31"><a href="#cb3-31" tabindex="-1"></a> Arguments<span class="sc">:</span></span>
-<span id="cb3-32"><a href="#cb3-32" tabindex="-1"></a>  o matrixSource <span class="ot">=</span> fcs</span>
-<span id="cb3-33"><a href="#cb3-33" tabindex="-1"></a><span class="dv">4</span> <span class="sc">:</span>Object of class <span class="st">"CytoProcessingStep"</span></span>
-<span id="cb3-34"><a href="#cb3-34" tabindex="-1"></a> Name<span class="sc">:</span> flowframe_aggregate</span>
-<span id="cb3-35"><a href="#cb3-35" tabindex="-1"></a> Function<span class="sc">:</span> aggregateAndSample</span>
-<span id="cb3-36"><a href="#cb3-36" tabindex="-1"></a> Arguments<span class="sc">:</span></span>
-<span id="cb3-37"><a href="#cb3-37" tabindex="-1"></a>  o nTotalEvents <span class="ot">=</span> <span class="dv">10000</span></span>
-<span id="cb3-38"><a href="#cb3-38" tabindex="-1"></a>  o seed <span class="ot">=</span> <span class="dv">0</span></span>
-<span id="cb3-39"><a href="#cb3-39" tabindex="-1"></a><span class="dv">5</span> <span class="sc">:</span>Object of class <span class="st">"CytoProcessingStep"</span></span>
-<span id="cb3-40"><a href="#cb3-40" tabindex="-1"></a> Name<span class="sc">:</span> scale_transform_estimate</span>
-<span id="cb3-41"><a href="#cb3-41" tabindex="-1"></a> Function<span class="sc">:</span> estimateScaleTransforms</span>
-<span id="cb3-42"><a href="#cb3-42" tabindex="-1"></a> Arguments<span class="sc">:</span></span>
-<span id="cb3-43"><a href="#cb3-43" tabindex="-1"></a>  o fluoMethod <span class="ot">=</span> estimateLogicle</span>
-<span id="cb3-44"><a href="#cb3-44" tabindex="-1"></a>  o scatterMethod <span class="ot">=</span> linearQuantile</span>
-<span id="cb3-45"><a href="#cb3-45" tabindex="-1"></a>  o scatterRefMarker <span class="ot">=</span> CD4</span>
-<span id="cb3-46"><a href="#cb3-46" tabindex="-1"></a>Flow frames pre<span class="sc">-</span>processing evaluation queue <span class="sc">:</span> <span class="dv">6</span> processing <span class="fu">step</span>(s)</span>
-<span id="cb3-47"><a href="#cb3-47" tabindex="-1"></a><span class="dv">1</span> <span class="sc">:</span>Object of class <span class="st">"CytoProcessingStep"</span></span>
-<span id="cb3-48"><a href="#cb3-48" tabindex="-1"></a> Name<span class="sc">:</span> flowframe_read</span>
-<span id="cb3-49"><a href="#cb3-49" tabindex="-1"></a> Function<span class="sc">:</span> readSampleFiles</span>
-<span id="cb3-50"><a href="#cb3-50" tabindex="-1"></a> Arguments<span class="sc">:</span></span>
-<span id="cb3-51"><a href="#cb3-51" tabindex="-1"></a>  o truncate_max_range <span class="ot">=</span> <span class="cn">FALSE</span></span>
-<span id="cb3-52"><a href="#cb3-52" tabindex="-1"></a>  o min.limit <span class="ot">=</span> </span>
-<span id="cb3-53"><a href="#cb3-53" tabindex="-1"></a><span class="dv">2</span> <span class="sc">:</span>Object of class <span class="st">"CytoProcessingStep"</span></span>
-<span id="cb3-54"><a href="#cb3-54" tabindex="-1"></a> Name<span class="sc">:</span> remove_margins</span>
-<span id="cb3-55"><a href="#cb3-55" tabindex="-1"></a> Function<span class="sc">:</span> removeMarginsPeacoQC</span>
-<span id="cb3-56"><a href="#cb3-56" tabindex="-1"></a> Arguments<span class="sc">:</span></span>
-<span id="cb3-57"><a href="#cb3-57" tabindex="-1"></a>  o channelSpecifications <span class="ot">=</span> <span class="fu">c</span>(<span class="sc">-</span><span class="dv">300</span>, <span class="dv">262144</span>)</span>
-<span id="cb3-58"><a href="#cb3-58" tabindex="-1"></a><span class="dv">3</span> <span class="sc">:</span>Object of class <span class="st">"CytoProcessingStep"</span></span>
-<span id="cb3-59"><a href="#cb3-59" tabindex="-1"></a> Name<span class="sc">:</span> remove_doublets</span>
-<span id="cb3-60"><a href="#cb3-60" tabindex="-1"></a> Function<span class="sc">:</span> removeDoubletsCytoPipeline</span>
-<span id="cb3-61"><a href="#cb3-61" tabindex="-1"></a> Arguments<span class="sc">:</span></span>
-<span id="cb3-62"><a href="#cb3-62" tabindex="-1"></a>  o areaChannels <span class="ot">=</span> FSC<span class="sc">-</span>A</span>
-<span id="cb3-63"><a href="#cb3-63" tabindex="-1"></a>  o heightChannels <span class="ot">=</span> FSC<span class="sc">-</span>H</span>
-<span id="cb3-64"><a href="#cb3-64" tabindex="-1"></a>  o nmads <span class="ot">=</span> <span class="dv">3</span></span>
-<span id="cb3-65"><a href="#cb3-65" tabindex="-1"></a><span class="dv">4</span> <span class="sc">:</span>Object of class <span class="st">"CytoProcessingStep"</span></span>
-<span id="cb3-66"><a href="#cb3-66" tabindex="-1"></a> Name<span class="sc">:</span> remove_debris</span>
-<span id="cb3-67"><a href="#cb3-67" tabindex="-1"></a> Function<span class="sc">:</span> removeDebrisFlowClustTmix</span>
-<span id="cb3-68"><a href="#cb3-68" tabindex="-1"></a> Arguments<span class="sc">:</span></span>
-<span id="cb3-69"><a href="#cb3-69" tabindex="-1"></a>  o FSCChannel <span class="ot">=</span> FSC<span class="sc">-</span>A</span>
-<span id="cb3-70"><a href="#cb3-70" tabindex="-1"></a>  o SSCChannel <span class="ot">=</span> SSC<span class="sc">-</span>A</span>
-<span id="cb3-71"><a href="#cb3-71" tabindex="-1"></a>  o nClusters <span class="ot">=</span> <span class="dv">3</span></span>
-<span id="cb3-72"><a href="#cb3-72" tabindex="-1"></a>  o level <span class="ot">=</span> <span class="fl">0.97</span></span>
-<span id="cb3-73"><a href="#cb3-73" tabindex="-1"></a>  o B <span class="ot">=</span> <span class="dv">100</span></span>
-<span id="cb3-74"><a href="#cb3-74" tabindex="-1"></a><span class="dv">5</span> <span class="sc">:</span>Object of class <span class="st">"CytoProcessingStep"</span></span>
-<span id="cb3-75"><a href="#cb3-75" tabindex="-1"></a> Name<span class="sc">:</span> compensate</span>
-<span id="cb3-76"><a href="#cb3-76" tabindex="-1"></a> Function<span class="sc">:</span> compensateFromMatrix</span>
-<span id="cb3-77"><a href="#cb3-77" tabindex="-1"></a> Arguments<span class="sc">:</span></span>
-<span id="cb3-78"><a href="#cb3-78" tabindex="-1"></a>  o matrixSource <span class="ot">=</span> fcs</span>
-<span id="cb3-79"><a href="#cb3-79" tabindex="-1"></a><span class="dv">6</span> <span class="sc">:</span>Object of class <span class="st">"CytoProcessingStep"</span></span>
-<span id="cb3-80"><a href="#cb3-80" tabindex="-1"></a> Name<span class="sc">:</span> perform_QC</span>
-<span id="cb3-81"><a href="#cb3-81" tabindex="-1"></a> Function<span class="sc">:</span> qualityControlPeacoQC</span>
-<span id="cb3-82"><a href="#cb3-82" tabindex="-1"></a> Arguments<span class="sc">:</span></span>
-<span id="cb3-83"><a href="#cb3-83" tabindex="-1"></a>  o preTransform <span class="ot">=</span> <span class="cn">TRUE</span></span>
-<span id="cb3-84"><a href="#cb3-84" tabindex="-1"></a>  o min_cells <span class="ot">=</span> <span class="dv">150</span></span>
-<span id="cb3-85"><a href="#cb3-85" tabindex="-1"></a>  o max_bins <span class="ot">=</span> <span class="dv">500</span></span>
-<span id="cb3-86"><a href="#cb3-86" tabindex="-1"></a>  o step <span class="ot">=</span> <span class="dv">500</span></span>
-<span id="cb3-87"><a href="#cb3-87" tabindex="-1"></a>  o MAD <span class="ot">=</span> <span class="dv">6</span></span>
-<span id="cb3-88"><a href="#cb3-88" tabindex="-1"></a>  o IT_limit <span class="ot">=</span> <span class="fl">0.55</span></span>
-<span id="cb3-89"><a href="#cb3-89" tabindex="-1"></a>  o force_IT <span class="ot">=</span> <span class="dv">150</span></span>
-<span id="cb3-90"><a href="#cb3-90" tabindex="-1"></a>  o peak_removal <span class="ot">=</span> <span class="fl">0.3333</span></span>
-<span id="cb3-91"><a href="#cb3-91" tabindex="-1"></a>  o min_nr_bins_peakdetection <span class="ot">=</span> <span class="dv">10</span></span></code></pre></div>
+<span id="cb3-28"><a href="#cb3-28" tabindex="-1"></a> Arguments<span class="sc">:</span></span>
+<span id="cb3-29"><a href="#cb3-29" tabindex="-1"></a>  o channelSpecifications <span class="ot">=</span> <span class="fu">c</span>(<span class="sc">-</span><span class="dv">300</span>, <span class="dv">262144</span>)</span>
+<span id="cb3-30"><a href="#cb3-30" tabindex="-1"></a><span class="dv">3</span> <span class="sc">:</span>Object of class <span class="st">"CytoProcessingStep"</span></span>
+<span id="cb3-31"><a href="#cb3-31" tabindex="-1"></a> Name<span class="sc">:</span> compensate</span>
+<span id="cb3-32"><a href="#cb3-32" tabindex="-1"></a> Function<span class="sc">:</span> compensateFromMatrix</span>
+<span id="cb3-33"><a href="#cb3-33" tabindex="-1"></a> Arguments<span class="sc">:</span></span>
+<span id="cb3-34"><a href="#cb3-34" tabindex="-1"></a>  o matrixSource <span class="ot">=</span> fcs</span>
+<span id="cb3-35"><a href="#cb3-35" tabindex="-1"></a><span class="dv">4</span> <span class="sc">:</span>Object of class <span class="st">"CytoProcessingStep"</span></span>
+<span id="cb3-36"><a href="#cb3-36" tabindex="-1"></a> Name<span class="sc">:</span> flowframe_aggregate</span>
+<span id="cb3-37"><a href="#cb3-37" tabindex="-1"></a> Function<span class="sc">:</span> aggregateAndSample</span>
+<span id="cb3-38"><a href="#cb3-38" tabindex="-1"></a> Arguments<span class="sc">:</span></span>
+<span id="cb3-39"><a href="#cb3-39" tabindex="-1"></a>  o nTotalEvents <span class="ot">=</span> <span class="dv">10000</span></span>
+<span id="cb3-40"><a href="#cb3-40" tabindex="-1"></a>  o seed <span class="ot">=</span> <span class="dv">0</span></span>
+<span id="cb3-41"><a href="#cb3-41" tabindex="-1"></a><span class="dv">5</span> <span class="sc">:</span>Object of class <span class="st">"CytoProcessingStep"</span></span>
+<span id="cb3-42"><a href="#cb3-42" tabindex="-1"></a> Name<span class="sc">:</span> scale_transform_estimate</span>
+<span id="cb3-43"><a href="#cb3-43" tabindex="-1"></a> Function<span class="sc">:</span> estimateScaleTransforms</span>
+<span id="cb3-44"><a href="#cb3-44" tabindex="-1"></a> Arguments<span class="sc">:</span></span>
+<span id="cb3-45"><a href="#cb3-45" tabindex="-1"></a>  o fluoMethod <span class="ot">=</span> estimateLogicle</span>
+<span id="cb3-46"><a href="#cb3-46" tabindex="-1"></a>  o scatterMethod <span class="ot">=</span> linearQuantile</span>
+<span id="cb3-47"><a href="#cb3-47" tabindex="-1"></a>  o scatterRefMarker <span class="ot">=</span> CD4</span>
+<span id="cb3-48"><a href="#cb3-48" tabindex="-1"></a>Flow frames pre<span class="sc">-</span>processing evaluation queue <span class="sc">:</span> <span class="dv">7</span> processing <span class="fu">step</span>(s)</span>
+<span id="cb3-49"><a href="#cb3-49" tabindex="-1"></a><span class="dv">1</span> <span class="sc">:</span>Object of class <span class="st">"CytoProcessingStep"</span></span>
+<span id="cb3-50"><a href="#cb3-50" tabindex="-1"></a> Name<span class="sc">:</span> flowframe_read</span>
+<span id="cb3-51"><a href="#cb3-51" tabindex="-1"></a> Function<span class="sc">:</span> readSampleFiles</span>
+<span id="cb3-52"><a href="#cb3-52" tabindex="-1"></a> Arguments<span class="sc">:</span></span>
+<span id="cb3-53"><a href="#cb3-53" tabindex="-1"></a>  o truncate_max_range <span class="ot">=</span> <span class="cn">FALSE</span></span>
+<span id="cb3-54"><a href="#cb3-54" tabindex="-1"></a>  o min.limit <span class="ot">=</span> </span>
+<span id="cb3-55"><a href="#cb3-55" tabindex="-1"></a><span class="dv">2</span> <span class="sc">:</span>Object of class <span class="st">"CytoProcessingStep"</span></span>
+<span id="cb3-56"><a href="#cb3-56" tabindex="-1"></a> Name<span class="sc">:</span> remove_margins</span>
+<span id="cb3-57"><a href="#cb3-57" tabindex="-1"></a> Function<span class="sc">:</span> removeMarginsPeacoQC</span>
+<span id="cb3-58"><a href="#cb3-58" tabindex="-1"></a> Arguments<span class="sc">:</span></span>
+<span id="cb3-59"><a href="#cb3-59" tabindex="-1"></a>  o channelSpecifications <span class="ot">=</span> <span class="fu">c</span>(<span class="sc">-</span><span class="dv">300</span>, <span class="dv">262144</span>)</span>
+<span id="cb3-60"><a href="#cb3-60" tabindex="-1"></a><span class="dv">3</span> <span class="sc">:</span>Object of class <span class="st">"CytoProcessingStep"</span></span>
+<span id="cb3-61"><a href="#cb3-61" tabindex="-1"></a> Name<span class="sc">:</span> perform_QC</span>
+<span id="cb3-62"><a href="#cb3-62" tabindex="-1"></a> Function<span class="sc">:</span> qualityControlFlowAI</span>
+<span id="cb3-63"><a href="#cb3-63" tabindex="-1"></a> Arguments<span class="sc">:</span></span>
+<span id="cb3-64"><a href="#cb3-64" tabindex="-1"></a>  o preTransform <span class="ot">=</span> <span class="cn">FALSE</span></span>
+<span id="cb3-65"><a href="#cb3-65" tabindex="-1"></a>  o remove_from <span class="ot">=</span> all</span>
+<span id="cb3-66"><a href="#cb3-66" tabindex="-1"></a>  o second_fractionFR <span class="ot">=</span> <span class="fl">0.1</span></span>
+<span id="cb3-67"><a href="#cb3-67" tabindex="-1"></a>  o deviationFR <span class="ot">=</span> MAD</span>
+<span id="cb3-68"><a href="#cb3-68" tabindex="-1"></a>  o alphaFR <span class="ot">=</span> <span class="fl">0.01</span></span>
+<span id="cb3-69"><a href="#cb3-69" tabindex="-1"></a>  o decompFR <span class="ot">=</span> <span class="cn">TRUE</span></span>
+<span id="cb3-70"><a href="#cb3-70" tabindex="-1"></a>  o outlier_binsFS <span class="ot">=</span> <span class="cn">FALSE</span></span>
+<span id="cb3-71"><a href="#cb3-71" tabindex="-1"></a>  o pen_valueFS <span class="ot">=</span> <span class="dv">200</span></span>
+<span id="cb3-72"><a href="#cb3-72" tabindex="-1"></a>  o max_cptFS <span class="ot">=</span> <span class="dv">3</span></span>
+<span id="cb3-73"><a href="#cb3-73" tabindex="-1"></a>  o sideFM <span class="ot">=</span> both</span>
+<span id="cb3-74"><a href="#cb3-74" tabindex="-1"></a>  o neg_valuesFM <span class="ot">=</span> <span class="dv">1</span></span>
+<span id="cb3-75"><a href="#cb3-75" tabindex="-1"></a><span class="dv">4</span> <span class="sc">:</span>Object of class <span class="st">"CytoProcessingStep"</span></span>
+<span id="cb3-76"><a href="#cb3-76" tabindex="-1"></a> Name<span class="sc">:</span> compensate</span>
+<span id="cb3-77"><a href="#cb3-77" tabindex="-1"></a> Function<span class="sc">:</span> compensateFromMatrix</span>
+<span id="cb3-78"><a href="#cb3-78" tabindex="-1"></a> Arguments<span class="sc">:</span></span>
+<span id="cb3-79"><a href="#cb3-79" tabindex="-1"></a>  o matrixSource <span class="ot">=</span> fcs</span>
+<span id="cb3-80"><a href="#cb3-80" tabindex="-1"></a><span class="dv">5</span> <span class="sc">:</span>Object of class <span class="st">"CytoProcessingStep"</span></span>
+<span id="cb3-81"><a href="#cb3-81" tabindex="-1"></a> Name<span class="sc">:</span> remove_doublets</span>
+<span id="cb3-82"><a href="#cb3-82" tabindex="-1"></a> Function<span class="sc">:</span> removeDoubletsCytoPipeline</span>
+<span id="cb3-83"><a href="#cb3-83" tabindex="-1"></a> Arguments<span class="sc">:</span></span>
+<span id="cb3-84"><a href="#cb3-84" tabindex="-1"></a>  o areaChannels <span class="ot">=</span> FSC<span class="sc">-</span>A</span>
+<span id="cb3-85"><a href="#cb3-85" tabindex="-1"></a>  o heightChannels <span class="ot">=</span> FSC<span class="sc">-</span>H</span>
+<span id="cb3-86"><a href="#cb3-86" tabindex="-1"></a>  o nmads <span class="ot">=</span> <span class="dv">3</span></span>
+<span id="cb3-87"><a href="#cb3-87" tabindex="-1"></a><span class="dv">6</span> <span class="sc">:</span>Object of class <span class="st">"CytoProcessingStep"</span></span>
+<span id="cb3-88"><a href="#cb3-88" tabindex="-1"></a> Name<span class="sc">:</span> remove_debris</span>
+<span id="cb3-89"><a href="#cb3-89" tabindex="-1"></a> Function<span class="sc">:</span> removeDebrisFlowClustTmix</span>
+<span id="cb3-90"><a href="#cb3-90" tabindex="-1"></a> Arguments<span class="sc">:</span></span>
+<span id="cb3-91"><a href="#cb3-91" tabindex="-1"></a>  o FSCChannel <span class="ot">=</span> FSC<span class="sc">-</span>A</span>
+<span id="cb3-92"><a href="#cb3-92" tabindex="-1"></a>  o SSCChannel <span class="ot">=</span> SSC<span class="sc">-</span>A</span>
+<span id="cb3-93"><a href="#cb3-93" tabindex="-1"></a>  o nClusters <span class="ot">=</span> <span class="dv">2</span></span>
+<span id="cb3-94"><a href="#cb3-94" tabindex="-1"></a>  o level <span class="ot">=</span> <span class="fl">0.97</span></span>
+<span id="cb3-95"><a href="#cb3-95" tabindex="-1"></a>  o B <span class="ot">=</span> <span class="dv">100</span></span>
+<span id="cb3-96"><a href="#cb3-96" tabindex="-1"></a><span class="dv">7</span> <span class="sc">:</span>Object of class <span class="st">"CytoProcessingStep"</span></span>
+<span id="cb3-97"><a href="#cb3-97" tabindex="-1"></a> Name<span class="sc">:</span> remove_dead_cells</span>
+<span id="cb3-98"><a href="#cb3-98" tabindex="-1"></a> Function<span class="sc">:</span> removeDeadCellsDeGate</span>
+<span id="cb3-99"><a href="#cb3-99" tabindex="-1"></a> Arguments<span class="sc">:</span></span>
+<span id="cb3-100"><a href="#cb3-100" tabindex="-1"></a>  o preTransform <span class="ot">=</span> <span class="cn">TRUE</span></span>
+<span id="cb3-101"><a href="#cb3-101" tabindex="-1"></a>  o LDMarker <span class="ot">=</span> L<span class="sc">/</span>D Aqua <span class="sc">-</span> Viability</span></code></pre></div>
 <p>As soon as the <em>CytoPipeline</em> object is created, it is
 possible to visualize the pipeline as a workflow plot, using the
 <code><a href="https://uclouvain-cbio.github.io/CytoPipeline/reference/inspectCytoPipelineObjects.html" class="external-link">CytoPipeline::plotCytoPipelineProcessingQueue()</a></code>
@@ -568,7 +588,7 @@ function.</p>
 <span>                                whichQueue <span class="op">=</span> <span class="st">"pre-processing"</span>,</span>
 <span>                                path <span class="op">=</span> <span class="va">resultsDir</span>,</span>
 <span>                                sampleFile <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span></code></pre></div>
-<p><img src="CytoPipeline_Workshop_files/figure-html/step2:plot-1.png" width="600" height="450" style="display: block; margin: auto;"></p>
+<p><img src="CytoPipeline_Workshop_files/figure-html/step2_plot-1.png" width="600" height="450" style="display: block; margin: auto;"></p>
 <p>In this plot, each arrow represents a step (as defined by the user),
 and the results of each step is represented as a bubble. Here, all
 bubbles are colored in orange, meaning that there is no results yet
@@ -596,33 +616,44 @@ needed steps, we can run it, by calling the
 <span><span class="co">#&gt; #####################################################</span></span>
 <span><span class="co">#&gt; Proceeding with step 1 [flowframe_read] ...</span></span>
 <span><span class="co">#&gt; Proceeding with step 2 [remove_margins] ...</span></span>
-<span><span class="co">#&gt; Removing margins from file : D91_G01.fcs</span></span>
-<span><span class="co">#&gt; Removing margins from file : D91_A01.fcs</span></span>
+<span><span class="co">#&gt; Removing margins from file : Donor1.fcs</span></span>
+<span><span class="co">#&gt; Removing margins from file : Donor2.fcs</span></span>
 <span><span class="co">#&gt; Proceeding with step 3 [compensate] ...</span></span>
-<span><span class="co">#&gt; Compensating file : D91_G01.fcs</span></span>
-<span><span class="co">#&gt; Compensating file : D91_A01.fcs</span></span>
+<span><span class="co">#&gt; Compensating file : Donor1.fcs</span></span>
+<span><span class="co">#&gt; Compensating file : Donor2.fcs</span></span>
 <span><span class="co">#&gt; Proceeding with step 4 [flowframe_aggregate] ...</span></span>
 <span><span class="co">#&gt; Proceeding with step 5 [scale_transform_estimate] ...</span></span>
 <span><span class="co">#&gt; estimating logicle transformations for fluorochrome channels...</span></span>
 <span><span class="co">#&gt; Estimating linear transformation for scatter channels : reference marker = CD4...</span></span>
 <span><span class="co">#&gt; applying specific linear transformation for FSC-A channel...</span></span>
-<span><span class="co">#&gt; initial quantiles : q5 = 2428.4839 ; q95 = 171164.6242</span></span>
-<span><span class="co">#&gt; target quantiles : q5 = 0.1851 ; q95 = 1.5152</span></span>
-<span><span class="co">#&gt; a = 7.88e-06 ; b = 1.66e-01</span></span>
+<span><span class="co">#&gt; initial quantiles : q5 = 15825.9604 ; q95 = 182291.0469</span></span>
+<span><span class="co">#&gt; target quantiles : q5 = 0.4556 ; q95 = 2.8719</span></span>
+<span><span class="co">#&gt; a = 1.45e-05 ; b = 2.26e-01</span></span>
 <span><span class="co">#&gt; applying FSC-A linear transformation for FSC-H channel...</span></span>
 <span><span class="co">#&gt; applying specific linear transformation for SSC-A channel...</span></span>
-<span><span class="co">#&gt; initial quantiles : q5 = 8792.7513 ; q95 = 85456.8254</span></span>
-<span><span class="co">#&gt; target quantiles : q5 = 0.1851 ; q95 = 1.5152</span></span>
-<span><span class="co">#&gt; a = 1.73e-05 ; b = 3.26e-02</span></span>
+<span><span class="co">#&gt; initial quantiles : q5 = 23846.3145 ; q95 = 222903.9688</span></span>
+<span><span class="co">#&gt; target quantiles : q5 = 0.4556 ; q95 = 2.8719</span></span>
+<span><span class="co">#&gt; a = 1.21e-05 ; b = 1.66e-01</span></span>
+<span><span class="co">#&gt; applying SSC-A linear transformation for SSC-H channel...</span></span>
 <span><span class="co">#&gt; #####################################################</span></span>
-<span><span class="co">#&gt; ### NOW PRE-PROCESSING FILE ./rawData/D91_G01.fcs...</span></span>
+<span><span class="co">#&gt; ### NOW PRE-PROCESSING FILE /usr/local/lib/R/site-library/CytoPipeline/extdata/Donor1.fcs...</span></span>
 <span><span class="co">#&gt; #####################################################</span></span>
 <span><span class="co">#&gt; Proceeding with step 1 [flowframe_read] ...</span></span>
 <span><span class="co">#&gt; Proceeding with step 2 [remove_margins] ...</span></span>
-<span><span class="co">#&gt; Removing margins from file : D91_G01.fcs</span></span>
-<span><span class="co">#&gt; Proceeding with step 3 [remove_doublets] ...</span></span>
-<span><span class="co">#&gt; Proceeding with step 4 [remove_debris] ...</span></span>
-<span><span class="co">#&gt; Error in removeDebrisFlowClustTmix(new("flowFrame", exprs = structure(c(0.128936007618904,  : </span></span>
+<span><span class="co">#&gt; Removing margins from file : Donor1.fcs</span></span>
+<span><span class="co">#&gt; Proceeding with step 3 [perform_QC] ...</span></span>
+<span><span class="co">#&gt; Applying flowAI method...</span></span>
+<span><span class="co">#&gt; Quality control for the file: Donor1</span></span>
+<span><span class="co">#&gt; Warning in ord_fcs_time(set[[i]], timeCh): Expression data in the file</span></span>
+<span><span class="co">#&gt; Donor1.fcs were not originally ordered by time.</span></span>
+<span><span class="co">#&gt; 3.56% of anomalous cells detected in the flow rate check. </span></span>
+<span><span class="co">#&gt; 0% of anomalous cells detected in signal acquisition check. </span></span>
+<span><span class="co">#&gt; 0.02% of anomalous cells detected in the dynamic range check.</span></span>
+<span><span class="co">#&gt; Proceeding with step 4 [compensate] ...</span></span>
+<span><span class="co">#&gt; Compensating file : Donor1.fcs</span></span>
+<span><span class="co">#&gt; Proceeding with step 5 [remove_doublets] ...</span></span>
+<span><span class="co">#&gt; Proceeding with step 6 [remove_debris] ...</span></span>
+<span><span class="co">#&gt; Error in removeDebrisFlowClustTmix(new("flowFrame", exprs = structure(c(7482.96044921875,  : </span></span>
 <span><span class="co">#&gt;   argument "nClust" is missing, with no default</span></span></code></pre></div>
 <p>Here, this leads to an error message in the
 <code>remove_debris</code> step, complaining that the
@@ -637,11 +668,11 @@ that we intentionally left a typo in our input json file, replacing the
 <span>                                path <span class="op">=</span> <span class="va">resultsDir</span>,</span>
 <span>                                sampleFile <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span></code></pre></div>
 <p><img src="CytoPipeline_Workshop_files/figure-html/step2_with_errors_plot-1.png" width="600" height="450" style="display: block; margin: auto;"></p>
-<p>Note that the first three bubbles are now highlighted in green,
-showing that the first three steps have now produced results. These
+<p>Note that the first five bubbles are now highlighted in green,
+showing that the first five steps have now produced results. These
 results have in fact been saved in a data cache, allowing for further
 visualization of the results.</p>
-<p>However, as mentioned earlier, the fourth step, ‘remove_debris’, has
+<p>However, as mentioned earlier, the sixth step, ‘remove_debris’, has
 resulted in an error, hence there is still not corresponding results,
 and so the corresponding bubble is still displayed with an orange
 contour.</p>
@@ -649,7 +680,7 @@ contour.</p>
 under the same experiment name :</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span></span>
-<span><span class="va">jsonFile</span> <span class="op">&lt;-</span> <span class="op">(</span><span class="st">"CytoPipeline_Demo_pipeline2.json"</span><span class="op">)</span></span>
+<span><span class="va">jsonFile</span> <span class="op">&lt;-</span> <span class="op">(</span><span class="st">"CytoPipeline_Demo_fAI_2.json"</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># creation of CytoPipeline object,</span></span>
 <span><span class="co"># using json file as input</span></span>
@@ -668,42 +699,62 @@ under the same experiment name :</p>
 <span><span class="co">#&gt; Proceeding with step 4 [flowframe_aggregate]: found in cache!</span></span>
 <span><span class="co">#&gt; Proceeding with step 5 [scale_transform_estimate]: found in cache!</span></span>
 <span><span class="co">#&gt; #####################################################</span></span>
-<span><span class="co">#&gt; ### NOW PRE-PROCESSING FILE ./rawData/D91_G01.fcs...</span></span>
+<span><span class="co">#&gt; ### NOW PRE-PROCESSING FILE /usr/local/lib/R/site-library/CytoPipeline/extdata/Donor1.fcs...</span></span>
 <span><span class="co">#&gt; #####################################################</span></span>
 <span><span class="co">#&gt; Proceeding with step 1 [flowframe_read]: found in cache!</span></span>
 <span><span class="co">#&gt; Proceeding with step 2 [remove_margins]: found in cache!</span></span>
-<span><span class="co">#&gt; Proceeding with step 3 [remove_doublets]: found in cache!</span></span>
-<span><span class="co">#&gt; Proceeding with step 4 [remove_debris] ...</span></span>
+<span><span class="co">#&gt; Proceeding with step 3 [perform_QC]: found in cache!</span></span>
+<span><span class="co">#&gt; Proceeding with step 4 [compensate]: found in cache!</span></span>
+<span><span class="co">#&gt; Proceeding with step 5 [remove_doublets]: found in cache!</span></span>
+<span><span class="co">#&gt; Proceeding with step 6 [remove_debris] ...</span></span>
 <span><span class="co">#&gt; The prior specification has no effect when usePrior=no</span></span>
 <span><span class="co">#&gt; Using the serial version of flowClust</span></span>
-<span><span class="co">#&gt; Proceeding with step 5 [compensate] ...</span></span>
-<span><span class="co">#&gt; Compensating file : D91_G01.fcs</span></span>
-<span><span class="co">#&gt; Proceeding with step 6 [perform_QC] ...</span></span>
-<span><span class="co">#&gt; Applying PeacoQC method...</span></span>
-<span><span class="co">#&gt; Starting quality control analysis for D91_G01.fcs</span></span>
-<span><span class="co">#&gt; Calculating peaks</span></span>
-<span><span class="co">#&gt; IT analysis removed 0% of the measurements</span></span>
-<span><span class="co">#&gt; MAD analysis removed 0% of the measurements</span></span>
-<span><span class="co">#&gt; The algorithm removed 0% of the measurements</span></span>
+<span><span class="co">#&gt; Proceeding with step 7 [remove_dead_cells] ...</span></span>
+<span><span class="co">#&gt; Removing Dead Cells events (using flowDensity::deGate()) from file : Donor1.fcs</span></span>
+<span><span class="co">#&gt; Warning: replacing previous import 'RPMG::ColorScale' by 'GEOmap::ColorScale'</span></span>
+<span><span class="co">#&gt; when loading 'RFOC'</span></span>
+<span><span class="co">#&gt; The legacy packages maptools, rgdal, and rgeos, underpinning the sp package,</span></span>
+<span><span class="co">#&gt; which was just loaded, will retire in October 2023.</span></span>
+<span><span class="co">#&gt; Please refer to R-spatial evolution reports for details, especially</span></span>
+<span><span class="co">#&gt; https://r-spatial.org/r/2023/05/15/evolution4.html.</span></span>
+<span><span class="co">#&gt; It may be desirable to make the sf package available;</span></span>
+<span><span class="co">#&gt; package maintainers should consider adding sf to Suggests:.</span></span>
+<span><span class="co">#&gt; The sp package is now running under evolution status 2</span></span>
+<span><span class="co">#&gt;      (status 2 uses the sf package in place of rgdal)</span></span>
+<span><span class="co">#&gt; rgeos version: 0.6-4, (SVN revision 699)</span></span>
+<span><span class="co">#&gt;  GEOS runtime version: 3.10.2-CAPI-1.16.0 </span></span>
+<span><span class="co">#&gt;  Please note that rgeos will be retired during October 2023,</span></span>
+<span><span class="co">#&gt; plan transition to sf or terra functions using GEOS at your earliest convenience.</span></span>
+<span><span class="co">#&gt; See https://r-spatial.org/r/2023/05/15/evolution4.html for details.</span></span>
+<span><span class="co">#&gt;  GEOS using OverlayNG</span></span>
+<span><span class="co">#&gt;  Linking to sp version: 2.0-0 </span></span>
+<span><span class="co">#&gt;  Polygon checking: TRUE</span></span>
+<span><span class="co">#&gt; Warning: replacing previous import 'flowCore::plot' by 'graphics::plot' when</span></span>
+<span><span class="co">#&gt; loading 'flowDensity'</span></span>
 <span><span class="co">#&gt; #####################################################</span></span>
-<span><span class="co">#&gt; ### NOW PRE-PROCESSING FILE ./rawData/D91_A01.fcs...</span></span>
+<span><span class="co">#&gt; ### NOW PRE-PROCESSING FILE /usr/local/lib/R/site-library/CytoPipeline/extdata/Donor2.fcs...</span></span>
 <span><span class="co">#&gt; #####################################################</span></span>
 <span><span class="co">#&gt; Proceeding with step 1 [flowframe_read] ...</span></span>
 <span><span class="co">#&gt; Proceeding with step 2 [remove_margins] ...</span></span>
-<span><span class="co">#&gt; Removing margins from file : D91_A01.fcs</span></span>
-<span><span class="co">#&gt; Proceeding with step 3 [remove_doublets] ...</span></span>
-<span><span class="co">#&gt; Proceeding with step 4 [remove_debris] ...</span></span>
+<span><span class="co">#&gt; Removing margins from file : Donor2.fcs</span></span>
+<span><span class="co">#&gt; Proceeding with step 3 [perform_QC] ...</span></span>
+<span><span class="co">#&gt; Applying flowAI method...</span></span>
+<span><span class="co">#&gt; Quality control for the file: Donor2</span></span>
+<span><span class="co">#&gt; Warning in ord_fcs_time(set[[i]], timeCh): Expression data in the file</span></span>
+<span><span class="co">#&gt; Donor2.fcs were not originally ordered by time.</span></span>
+<span><span class="co">#&gt; 3.98% of anomalous cells detected in the flow rate check. </span></span>
+<span><span class="co">#&gt; 0% of anomalous cells detected in signal acquisition check. </span></span>
+<span><span class="co">#&gt; 0.13% of anomalous cells detected in the dynamic range check.</span></span>
+<span><span class="co">#&gt; Proceeding with step 4 [compensate] ...</span></span>
+<span><span class="co">#&gt; Compensating file : Donor2.fcs</span></span>
+<span><span class="co">#&gt; Proceeding with step 5 [remove_doublets] ...</span></span>
+<span><span class="co">#&gt; Proceeding with step 6 [remove_debris] ...</span></span>
 <span><span class="co">#&gt; The prior specification has no effect when usePrior=no</span></span>
 <span><span class="co">#&gt; Using the serial version of flowClust</span></span>
-<span><span class="co">#&gt; Proceeding with step 5 [compensate] ...</span></span>
-<span><span class="co">#&gt; Compensating file : D91_A01.fcs</span></span>
-<span><span class="co">#&gt; Proceeding with step 6 [perform_QC] ...</span></span>
-<span><span class="co">#&gt; Applying PeacoQC method...</span></span>
-<span><span class="co">#&gt; Starting quality control analysis for D91_A01.fcs</span></span>
-<span><span class="co">#&gt; Calculating peaks</span></span>
-<span><span class="co">#&gt; IT analysis removed 0.89% of the measurements</span></span>
-<span><span class="co">#&gt; MAD analysis removed 3.11% of the measurements</span></span>
-<span><span class="co">#&gt; The algorithm removed 3.11% of the measurements</span></span>
+<span><span class="co">#&gt; Proceeding with step 7 [remove_dead_cells] ...</span></span>
+<span><span class="co">#&gt; Removing Dead Cells events (using flowDensity::deGate()) from file : Donor2.fcs</span></span>
+<span><span class="co">#&gt; [1] "Only one peak is found, set standard deviation, percentile, or upper arguments accordingly"</span></span>
+<span><span class="co">#&gt; [1] "Cutoff is based on inflection point."</span></span>
 <span></span>
 <span><span class="fu">plotCytoPipelineProcessingQueue</span><span class="op">(</span><span class="va">pipL</span>, </span>
 <span>                                whichQueue <span class="op">=</span> <span class="st">"pre-processing"</span>,</span>
@@ -711,7 +762,7 @@ under the same experiment name :</p>
 <span>                                sampleFile <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span></code></pre></div>
 <p><img src="CytoPipeline_Workshop_files/figure-html/step2_ok-1.png" width="600" height="450" style="display: block; margin: auto;"></p>
 <p>The pipeline now executes correctly! Note that all steps that were
-previously correctly executed are not re-run, the results are indeed
+previously correctly executed are not re-run, the results are instead
 read from the data cache.</p>
 <p><br></p>
 <p>Let us now visualize our results, using one of the two shiny
@@ -721,9 +772,10 @@ applications implemented in the <em>CytoPipelineGUI</em> package.</p>
 <span><span class="co"># launch shiny app</span></span>
 <span><span class="fu">CytoPipelineGUI</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/CytoPipelineGUI/man/CytoPipelineCheckApp.html" class="external-link">CytoPipelineCheckApp</a></span><span class="op">(</span>dir <span class="op">=</span> <span class="va">resultsDir</span><span class="op">)</span></span></code></pre></div>
 <p>When visualizing interactively the results of our pipeline, more
-specifically when looking at the <code>remove_debris</code> step, we can
-notice that this step was not totally effective in removing all
-undesirable events in the FSC-A/SSC-A 2D representation.</p>
+specifically when looking at the <code>remove_debris</code> step in the
+FSC-A/SSC-A 2D representation, we can notice that, for the second
+sample, this step eliminated much more than the undesirable debris
+events. This has to be improved!</p>
 <p><br></p>
 <p><img src="CytoPipeline_Workshop_files/figure-html/step2_viz_prog-1.png" width="900" height="300" style="display: block; margin: auto;"></p>
 </div>
@@ -732,8 +784,8 @@ undesirable events in the FSC-A/SSC-A 2D representation.</p>
 </h4>
 <p>In order to cope with the issue of the
 <code>remove_debris</code>step, we create a new pipeline with the same
-steps, only we use <code>nClust = 2</code> instead of
-<code>nClust = 3</code> as the number of clusters to be found during
+steps, only we use <code>nClust = 3</code> instead of
+<code>nClust = 2</code> as the number of clusters to be found during
 this step. We run this amended version of the pipeline under a new
 experiment name, in order to allow for visual comparison of results
 between the two versions.</p>
@@ -741,11 +793,11 @@ between the two versions.</p>
 <code class="sourceCode R"><span></span>
 <span><span class="co"># 3.</span></span>
 <span></span>
-<span><span class="co"># create pipeline with nClust = 2</span></span>
+<span><span class="co"># create pipeline with nClust = 3</span></span>
 <span></span>
-<span><span class="va">expName</span> <span class="op">&lt;-</span> <span class="st">"CytoPipeline_Demo_2C"</span></span>
+<span><span class="va">expName</span> <span class="op">&lt;-</span> <span class="st">"CytoPipeline_Demo_3C"</span></span>
 <span></span>
-<span><span class="va">jsonFile</span> <span class="op">&lt;-</span> <span class="op">(</span><span class="st">"CytoPipeline_Demo_pipeline_2C.json"</span><span class="op">)</span></span>
+<span><span class="va">jsonFile</span> <span class="op">&lt;-</span> <span class="op">(</span><span class="st">"CytoPipeline_Demo_fAI_3C.json"</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">pipL2</span> <span class="op">&lt;-</span> <span class="fu">CytoPipeline</span><span class="op">(</span><span class="va">jsonFile</span>,</span>
 <span>                      experimentName <span class="op">=</span> <span class="va">expName</span>,</span>
@@ -759,71 +811,80 @@ between the two versions.</p>
 <span><span class="co">#&gt; #####################################################</span></span>
 <span><span class="co">#&gt; Proceeding with step 1 [flowframe_read] ...</span></span>
 <span><span class="co">#&gt; Proceeding with step 2 [remove_margins] ...</span></span>
-<span><span class="co">#&gt; Removing margins from file : D91_G01.fcs</span></span>
-<span><span class="co">#&gt; Removing margins from file : D91_A01.fcs</span></span>
+<span><span class="co">#&gt; Removing margins from file : Donor1.fcs</span></span>
+<span><span class="co">#&gt; Removing margins from file : Donor2.fcs</span></span>
 <span><span class="co">#&gt; Proceeding with step 3 [compensate] ...</span></span>
-<span><span class="co">#&gt; Compensating file : D91_G01.fcs</span></span>
-<span><span class="co">#&gt; Compensating file : D91_A01.fcs</span></span>
+<span><span class="co">#&gt; Compensating file : Donor1.fcs</span></span>
+<span><span class="co">#&gt; Compensating file : Donor2.fcs</span></span>
 <span><span class="co">#&gt; Proceeding with step 4 [flowframe_aggregate] ...</span></span>
 <span><span class="co">#&gt; Proceeding with step 5 [scale_transform_estimate] ...</span></span>
 <span><span class="co">#&gt; estimating logicle transformations for fluorochrome channels...</span></span>
 <span><span class="co">#&gt; Estimating linear transformation for scatter channels : reference marker = CD4...</span></span>
 <span><span class="co">#&gt; applying specific linear transformation for FSC-A channel...</span></span>
-<span><span class="co">#&gt; initial quantiles : q5 = 2428.4839 ; q95 = 171164.6242</span></span>
-<span><span class="co">#&gt; target quantiles : q5 = 0.1851 ; q95 = 1.5152</span></span>
-<span><span class="co">#&gt; a = 7.88e-06 ; b = 1.66e-01</span></span>
+<span><span class="co">#&gt; initial quantiles : q5 = 15825.9604 ; q95 = 182291.0469</span></span>
+<span><span class="co">#&gt; target quantiles : q5 = 0.4556 ; q95 = 2.8719</span></span>
+<span><span class="co">#&gt; a = 1.45e-05 ; b = 2.26e-01</span></span>
 <span><span class="co">#&gt; applying FSC-A linear transformation for FSC-H channel...</span></span>
 <span><span class="co">#&gt; applying specific linear transformation for SSC-A channel...</span></span>
-<span><span class="co">#&gt; initial quantiles : q5 = 8792.7513 ; q95 = 85456.8254</span></span>
-<span><span class="co">#&gt; target quantiles : q5 = 0.1851 ; q95 = 1.5152</span></span>
-<span><span class="co">#&gt; a = 1.73e-05 ; b = 3.26e-02</span></span>
+<span><span class="co">#&gt; initial quantiles : q5 = 23846.3145 ; q95 = 222903.9688</span></span>
+<span><span class="co">#&gt; target quantiles : q5 = 0.4556 ; q95 = 2.8719</span></span>
+<span><span class="co">#&gt; a = 1.21e-05 ; b = 1.66e-01</span></span>
+<span><span class="co">#&gt; applying SSC-A linear transformation for SSC-H channel...</span></span>
 <span><span class="co">#&gt; #####################################################</span></span>
-<span><span class="co">#&gt; ### NOW PRE-PROCESSING FILE ./rawData/D91_G01.fcs...</span></span>
-<span><span class="co">#&gt; #####################################################</span></span>
-<span><span class="co">#&gt; Proceeding with step 1 [flowframe_read] ...</span></span>
-<span><span class="co">#&gt; Proceeding with step 2 [remove_margins] ...</span></span>
-<span><span class="co">#&gt; Removing margins from file : D91_G01.fcs</span></span>
-<span><span class="co">#&gt; Proceeding with step 3 [remove_doublets] ...</span></span>
-<span><span class="co">#&gt; Proceeding with step 4 [remove_debris] ...</span></span>
-<span><span class="co">#&gt; The prior specification has no effect when usePrior=no</span></span>
-<span><span class="co">#&gt; Using the serial version of flowClust</span></span>
-<span><span class="co">#&gt; Proceeding with step 5 [compensate] ...</span></span>
-<span><span class="co">#&gt; Compensating file : D91_G01.fcs</span></span>
-<span><span class="co">#&gt; Proceeding with step 6 [perform_QC] ...</span></span>
-<span><span class="co">#&gt; Applying PeacoQC method...</span></span>
-<span><span class="co">#&gt; Starting quality control analysis for D91_G01.fcs</span></span>
-<span><span class="co">#&gt; Calculating peaks</span></span>
-<span><span class="co">#&gt; IT analysis removed 0% of the measurements</span></span>
-<span><span class="co">#&gt; MAD analysis removed 0.02% of the measurements</span></span>
-<span><span class="co">#&gt; The algorithm removed 0.02% of the measurements</span></span>
-<span><span class="co">#&gt; #####################################################</span></span>
-<span><span class="co">#&gt; ### NOW PRE-PROCESSING FILE ./rawData/D91_A01.fcs...</span></span>
+<span><span class="co">#&gt; ### NOW PRE-PROCESSING FILE /usr/local/lib/R/site-library/CytoPipeline/extdata/Donor1.fcs...</span></span>
 <span><span class="co">#&gt; #####################################################</span></span>
 <span><span class="co">#&gt; Proceeding with step 1 [flowframe_read] ...</span></span>
 <span><span class="co">#&gt; Proceeding with step 2 [remove_margins] ...</span></span>
-<span><span class="co">#&gt; Removing margins from file : D91_A01.fcs</span></span>
-<span><span class="co">#&gt; Proceeding with step 3 [remove_doublets] ...</span></span>
-<span><span class="co">#&gt; Proceeding with step 4 [remove_debris] ...</span></span>
+<span><span class="co">#&gt; Removing margins from file : Donor1.fcs</span></span>
+<span><span class="co">#&gt; Proceeding with step 3 [perform_QC] ...</span></span>
+<span><span class="co">#&gt; Applying flowAI method...</span></span>
+<span><span class="co">#&gt; Quality control for the file: Donor1</span></span>
+<span><span class="co">#&gt; Warning in ord_fcs_time(set[[i]], timeCh): Expression data in the file</span></span>
+<span><span class="co">#&gt; Donor1.fcs were not originally ordered by time.</span></span>
+<span><span class="co">#&gt; 3.56% of anomalous cells detected in the flow rate check. </span></span>
+<span><span class="co">#&gt; 0% of anomalous cells detected in signal acquisition check. </span></span>
+<span><span class="co">#&gt; 0.02% of anomalous cells detected in the dynamic range check.</span></span>
+<span><span class="co">#&gt; Proceeding with step 4 [compensate] ...</span></span>
+<span><span class="co">#&gt; Compensating file : Donor1.fcs</span></span>
+<span><span class="co">#&gt; Proceeding with step 5 [remove_doublets] ...</span></span>
+<span><span class="co">#&gt; Proceeding with step 6 [remove_debris] ...</span></span>
 <span><span class="co">#&gt; The prior specification has no effect when usePrior=no</span></span>
 <span><span class="co">#&gt; Using the serial version of flowClust</span></span>
-<span><span class="co">#&gt; Proceeding with step 5 [compensate] ...</span></span>
-<span><span class="co">#&gt; Compensating file : D91_A01.fcs</span></span>
-<span><span class="co">#&gt; Proceeding with step 6 [perform_QC] ...</span></span>
-<span><span class="co">#&gt; Applying PeacoQC method...</span></span>
-<span><span class="co">#&gt; Starting quality control analysis for D91_A01.fcs</span></span>
-<span><span class="co">#&gt; Calculating peaks</span></span>
-<span><span class="co">#&gt; IT analysis removed 0% of the measurements</span></span>
-<span><span class="co">#&gt; MAD analysis removed 4% of the measurements</span></span>
-<span><span class="co">#&gt; The algorithm removed 4% of the measurements</span></span>
+<span><span class="co">#&gt; Proceeding with step 7 [remove_dead_cells] ...</span></span>
+<span><span class="co">#&gt; Removing Dead Cells events (using flowDensity::deGate()) from file : Donor1.fcs</span></span>
+<span><span class="co">#&gt; #####################################################</span></span>
+<span><span class="co">#&gt; ### NOW PRE-PROCESSING FILE /usr/local/lib/R/site-library/CytoPipeline/extdata/Donor2.fcs...</span></span>
+<span><span class="co">#&gt; #####################################################</span></span>
+<span><span class="co">#&gt; Proceeding with step 1 [flowframe_read] ...</span></span>
+<span><span class="co">#&gt; Proceeding with step 2 [remove_margins] ...</span></span>
+<span><span class="co">#&gt; Removing margins from file : Donor2.fcs</span></span>
+<span><span class="co">#&gt; Proceeding with step 3 [perform_QC] ...</span></span>
+<span><span class="co">#&gt; Applying flowAI method...</span></span>
+<span><span class="co">#&gt; Quality control for the file: Donor2</span></span>
+<span><span class="co">#&gt; Warning in ord_fcs_time(set[[i]], timeCh): Expression data in the file</span></span>
+<span><span class="co">#&gt; Donor2.fcs were not originally ordered by time.</span></span>
+<span><span class="co">#&gt; 3.98% of anomalous cells detected in the flow rate check. </span></span>
+<span><span class="co">#&gt; 0% of anomalous cells detected in signal acquisition check. </span></span>
+<span><span class="co">#&gt; 0.13% of anomalous cells detected in the dynamic range check.</span></span>
+<span><span class="co">#&gt; Proceeding with step 4 [compensate] ...</span></span>
+<span><span class="co">#&gt; Compensating file : Donor2.fcs</span></span>
+<span><span class="co">#&gt; Proceeding with step 5 [remove_doublets] ...</span></span>
+<span><span class="co">#&gt; Proceeding with step 6 [remove_debris] ...</span></span>
+<span><span class="co">#&gt; The prior specification has no effect when usePrior=no</span></span>
+<span><span class="co">#&gt; Using the serial version of flowClust</span></span>
+<span><span class="co">#&gt; Proceeding with step 7 [remove_dead_cells] ...</span></span>
+<span><span class="co">#&gt; Removing Dead Cells events (using flowDensity::deGate()) from file : Donor2.fcs</span></span>
 <span></span>
 <span><span class="fu">plotCytoPipelineProcessingQueue</span><span class="op">(</span><span class="va">pipL2</span>, </span>
 <span>                                whichQueue <span class="op">=</span> <span class="st">"pre-processing"</span>,</span>
 <span>                                path <span class="op">=</span> <span class="va">resultsDir</span>,</span>
-<span>                                sampleFile <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span></code></pre></div>
-<p><img src="CytoPipeline_Workshop_files/figure-html/step3:nClust-2-1.png" width="600" height="450" style="display: block; margin: auto;"></p>
+<span>                                sampleFile <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span></code></pre></div>
+<p><img src="CytoPipeline_Workshop_files/figure-html/step3_nClust_3-1.png" width="600" height="450" style="display: block; margin: auto;"></p>
 <p>Now that this pipeline has run until completion, we can now visualize
 interactively what the <code>remove_debris</code> gives as results, with
-this new <code>nClust = 2</code> parameter :</p>
+this new <code>nClust = 3</code> parameter. We can notice that the
+debris removal, for sample 2, has worked much better with this new
+parameter setting.</p>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span></span>
 <span><span class="co"># launch shiny app</span></span>
@@ -834,10 +895,11 @@ this new <code>nClust = 2</code> parameter :</p>
 <h4 id="comparing-pipelines">Comparing pipelines<a class="anchor" aria-label="anchor" href="#comparing-pipelines"></a>
 </h4>
 <p>In this section, we will run the alternative pipeline using
-<em>flowAI</em> as QC in time method. As mentioned in the introduction,
-this implies a slightly order of the steps as well. The pipeline is
-described in the following json file:</p>
-<div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" tabindex="-1"></a>jsonFile <span class="ot">&lt;-</span> (<span class="st">"CytoPipeline_Demo_pipeline_flowAI.json"</span>)</span>
+<em>PeacoQC</em> as QC in time method, and then compare with what we get
+with <em>flowAI</em>. As mentioned in the introduction, the
+<em>PeacoQC</em> pipeline implies a slightly order of the steps as well.
+The pipeline is described in the following json file:</p>
+<div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" tabindex="-1"></a>jsonFile <span class="ot">&lt;-</span> (<span class="st">"CytoPipeline_Demo_PQC.json"</span>)</span>
 <span id="cb11-2"><a href="#cb11-2" tabindex="-1"></a><span class="fu">cat</span>(<span class="fu">readLines</span>(jsonFile), <span class="at">sep =</span> <span class="st">'</span><span class="sc">\n</span><span class="st">'</span>)</span>
 <span id="cb11-3"><a href="#cb11-3" tabindex="-1"></a>{</span>
 <span id="cb11-4"><a href="#cb11-4" tabindex="-1"></a>  <span class="st">"scaleTransformProcessingSteps"</span><span class="sc">:</span> [</span>
@@ -853,108 +915,118 @@ described in the following json file:</p>
 <span id="cb11-14"><a href="#cb11-14" tabindex="-1"></a>    {</span>
 <span id="cb11-15"><a href="#cb11-15" tabindex="-1"></a>      <span class="st">"name"</span><span class="sc">:</span> [<span class="st">"remove_margins"</span>],</span>
 <span id="cb11-16"><a href="#cb11-16" tabindex="-1"></a>      <span class="st">"FUN"</span><span class="sc">:</span> [<span class="st">"removeMarginsPeacoQC"</span>],</span>
-<span id="cb11-17"><a href="#cb11-17" tabindex="-1"></a>      <span class="st">"ARGS"</span><span class="sc">:</span> []</span>
-<span id="cb11-18"><a href="#cb11-18" tabindex="-1"></a>    },</span>
-<span id="cb11-19"><a href="#cb11-19" tabindex="-1"></a>    {</span>
-<span id="cb11-20"><a href="#cb11-20" tabindex="-1"></a>      <span class="st">"name"</span><span class="sc">:</span> [<span class="st">"compensate"</span>],</span>
-<span id="cb11-21"><a href="#cb11-21" tabindex="-1"></a>      <span class="st">"FUN"</span><span class="sc">:</span> [<span class="st">"compensateFromMatrix"</span>],</span>
-<span id="cb11-22"><a href="#cb11-22" tabindex="-1"></a>      <span class="st">"ARGS"</span><span class="sc">:</span> {</span>
-<span id="cb11-23"><a href="#cb11-23" tabindex="-1"></a>        <span class="st">"matrixSource"</span><span class="sc">:</span> [<span class="st">"fcs"</span>]</span>
-<span id="cb11-24"><a href="#cb11-24" tabindex="-1"></a>      }</span>
-<span id="cb11-25"><a href="#cb11-25" tabindex="-1"></a>    },</span>
-<span id="cb11-26"><a href="#cb11-26" tabindex="-1"></a>    {</span>
-<span id="cb11-27"><a href="#cb11-27" tabindex="-1"></a>      <span class="st">"name"</span><span class="sc">:</span> [<span class="st">"flowframe_aggregate"</span>],</span>
-<span id="cb11-28"><a href="#cb11-28" tabindex="-1"></a>      <span class="st">"FUN"</span><span class="sc">:</span> [<span class="st">"aggregateAndSample"</span>],</span>
-<span id="cb11-29"><a href="#cb11-29" tabindex="-1"></a>      <span class="st">"ARGS"</span><span class="sc">:</span> {</span>
-<span id="cb11-30"><a href="#cb11-30" tabindex="-1"></a>        <span class="st">"nTotalEvents"</span><span class="sc">:</span> [<span class="dv">10000</span>],</span>
-<span id="cb11-31"><a href="#cb11-31" tabindex="-1"></a>        <span class="st">"seed"</span><span class="sc">:</span> [<span class="dv">0</span>]</span>
-<span id="cb11-32"><a href="#cb11-32" tabindex="-1"></a>      }</span>
-<span id="cb11-33"><a href="#cb11-33" tabindex="-1"></a>    },</span>
-<span id="cb11-34"><a href="#cb11-34" tabindex="-1"></a>    {</span>
-<span id="cb11-35"><a href="#cb11-35" tabindex="-1"></a>      <span class="st">"name"</span><span class="sc">:</span> [<span class="st">"scale_transform_estimate"</span>],</span>
-<span id="cb11-36"><a href="#cb11-36" tabindex="-1"></a>      <span class="st">"FUN"</span><span class="sc">:</span> [<span class="st">"estimateScaleTransforms"</span>],</span>
-<span id="cb11-37"><a href="#cb11-37" tabindex="-1"></a>      <span class="st">"ARGS"</span><span class="sc">:</span> {</span>
-<span id="cb11-38"><a href="#cb11-38" tabindex="-1"></a>        <span class="st">"fluoMethod"</span><span class="sc">:</span> [<span class="st">"estimateLogicle"</span>],</span>
-<span id="cb11-39"><a href="#cb11-39" tabindex="-1"></a>        <span class="st">"scatterMethod"</span><span class="sc">:</span> [<span class="st">"linearQuantile"</span>],</span>
-<span id="cb11-40"><a href="#cb11-40" tabindex="-1"></a>        <span class="st">"scatterRefMarker"</span><span class="sc">:</span> [<span class="st">"CD4"</span>]</span>
-<span id="cb11-41"><a href="#cb11-41" tabindex="-1"></a>      }</span>
-<span id="cb11-42"><a href="#cb11-42" tabindex="-1"></a>    }</span>
-<span id="cb11-43"><a href="#cb11-43" tabindex="-1"></a>  ],  </span>
-<span id="cb11-44"><a href="#cb11-44" tabindex="-1"></a>  <span class="st">"flowFramesPreProcessingSteps"</span><span class="sc">:</span> [</span>
-<span id="cb11-45"><a href="#cb11-45" tabindex="-1"></a>    {</span>
-<span id="cb11-46"><a href="#cb11-46" tabindex="-1"></a>      <span class="st">"name"</span><span class="sc">:</span> [<span class="st">"flowframe_read"</span>],</span>
-<span id="cb11-47"><a href="#cb11-47" tabindex="-1"></a>      <span class="st">"FUN"</span><span class="sc">:</span> [<span class="st">"readSampleFiles"</span>],</span>
-<span id="cb11-48"><a href="#cb11-48" tabindex="-1"></a>      <span class="st">"ARGS"</span><span class="sc">:</span> {</span>
-<span id="cb11-49"><a href="#cb11-49" tabindex="-1"></a>        <span class="st">"truncate_max_range"</span><span class="sc">:</span> [false],</span>
-<span id="cb11-50"><a href="#cb11-50" tabindex="-1"></a>        <span class="st">"min.limit"</span><span class="sc">:</span> null</span>
-<span id="cb11-51"><a href="#cb11-51" tabindex="-1"></a>      }</span>
-<span id="cb11-52"><a href="#cb11-52" tabindex="-1"></a>    }, </span>
-<span id="cb11-53"><a href="#cb11-53" tabindex="-1"></a>    {</span>
-<span id="cb11-54"><a href="#cb11-54" tabindex="-1"></a>      <span class="st">"name"</span><span class="sc">:</span> [<span class="st">"remove_margins"</span>],</span>
-<span id="cb11-55"><a href="#cb11-55" tabindex="-1"></a>      <span class="st">"FUN"</span><span class="sc">:</span> [<span class="st">"removeMarginsPeacoQC"</span>],</span>
-<span id="cb11-56"><a href="#cb11-56" tabindex="-1"></a>      <span class="st">"ARGS"</span><span class="sc">:</span> {</span>
-<span id="cb11-57"><a href="#cb11-57" tabindex="-1"></a>        <span class="st">"channelSpecifications"</span><span class="sc">:</span> {</span>
-<span id="cb11-58"><a href="#cb11-58" tabindex="-1"></a>          <span class="st">"AllFluoChannels"</span><span class="sc">:</span> [<span class="sc">-</span><span class="dv">300</span>, <span class="dv">262144</span>]</span>
-<span id="cb11-59"><a href="#cb11-59" tabindex="-1"></a>        }</span>
-<span id="cb11-60"><a href="#cb11-60" tabindex="-1"></a>      }</span>
-<span id="cb11-61"><a href="#cb11-61" tabindex="-1"></a>    },  </span>
-<span id="cb11-62"><a href="#cb11-62" tabindex="-1"></a>    {</span>
-<span id="cb11-63"><a href="#cb11-63" tabindex="-1"></a>      <span class="st">"name"</span><span class="sc">:</span> [<span class="st">"perform_QC"</span>],</span>
-<span id="cb11-64"><a href="#cb11-64" tabindex="-1"></a>      <span class="st">"FUN"</span><span class="sc">:</span> [<span class="st">"qualityControlFlowAI"</span>],</span>
-<span id="cb11-65"><a href="#cb11-65" tabindex="-1"></a>      <span class="st">"ARGS"</span><span class="sc">:</span> {       </span>
-<span id="cb11-66"><a href="#cb11-66" tabindex="-1"></a>        <span class="st">"preTransform"</span><span class="sc">:</span> [false],</span>
-<span id="cb11-67"><a href="#cb11-67" tabindex="-1"></a>        <span class="st">"remove_from"</span><span class="sc">:</span> [<span class="st">"all"</span>],</span>
-<span id="cb11-68"><a href="#cb11-68" tabindex="-1"></a>        <span class="st">"second_fractionFR"</span><span class="sc">:</span> [<span class="fl">0.1</span>],</span>
-<span id="cb11-69"><a href="#cb11-69" tabindex="-1"></a>        <span class="st">"deviationFR"</span><span class="sc">:</span> [<span class="st">"MAD"</span>],</span>
-<span id="cb11-70"><a href="#cb11-70" tabindex="-1"></a>        <span class="st">"alphaFR"</span><span class="sc">:</span> [<span class="fl">0.01</span>],</span>
-<span id="cb11-71"><a href="#cb11-71" tabindex="-1"></a>        <span class="st">"decompFR"</span><span class="sc">:</span> [true],</span>
-<span id="cb11-72"><a href="#cb11-72" tabindex="-1"></a>        <span class="st">"outlier_binsFS"</span><span class="sc">:</span> [false],</span>
-<span id="cb11-73"><a href="#cb11-73" tabindex="-1"></a>        <span class="st">"pen_valueFS"</span><span class="sc">:</span> [<span class="dv">200</span>],</span>
-<span id="cb11-74"><a href="#cb11-74" tabindex="-1"></a>        <span class="st">"max_cptFS"</span><span class="sc">:</span> [<span class="dv">3</span>],</span>
-<span id="cb11-75"><a href="#cb11-75" tabindex="-1"></a>        <span class="st">"sideFM"</span><span class="sc">:</span> [<span class="st">"both"</span>],</span>
-<span id="cb11-76"><a href="#cb11-76" tabindex="-1"></a>        <span class="st">"neg_valuesFM"</span><span class="sc">:</span> [<span class="dv">1</span>]</span>
-<span id="cb11-77"><a href="#cb11-77" tabindex="-1"></a>      }</span>
-<span id="cb11-78"><a href="#cb11-78" tabindex="-1"></a>    },</span>
-<span id="cb11-79"><a href="#cb11-79" tabindex="-1"></a>    {</span>
-<span id="cb11-80"><a href="#cb11-80" tabindex="-1"></a>      <span class="st">"name"</span><span class="sc">:</span> [<span class="st">"remove_doublets"</span>],</span>
-<span id="cb11-81"><a href="#cb11-81" tabindex="-1"></a>      <span class="st">"FUN"</span><span class="sc">:</span> [<span class="st">"removeDoubletsCytoPipeline"</span>],</span>
-<span id="cb11-82"><a href="#cb11-82" tabindex="-1"></a>      <span class="st">"ARGS"</span><span class="sc">:</span> {</span>
-<span id="cb11-83"><a href="#cb11-83" tabindex="-1"></a>        <span class="st">"areaChannels"</span><span class="sc">:</span> [<span class="st">"FSC-A"</span>],</span>
-<span id="cb11-84"><a href="#cb11-84" tabindex="-1"></a>        <span class="st">"heightChannels"</span><span class="sc">:</span> [<span class="st">"FSC-H"</span>],</span>
-<span id="cb11-85"><a href="#cb11-85" tabindex="-1"></a>        <span class="st">"nmads"</span><span class="sc">:</span> [<span class="dv">3</span>]</span>
+<span id="cb11-17"><a href="#cb11-17" tabindex="-1"></a>      <span class="st">"ARGS"</span><span class="sc">:</span> {</span>
+<span id="cb11-18"><a href="#cb11-18" tabindex="-1"></a>        <span class="st">"channelSpecifications"</span><span class="sc">:</span> {</span>
+<span id="cb11-19"><a href="#cb11-19" tabindex="-1"></a>          <span class="st">"AllFluoChannels"</span><span class="sc">:</span> [<span class="sc">-</span><span class="dv">300</span>, <span class="dv">262144</span>]</span>
+<span id="cb11-20"><a href="#cb11-20" tabindex="-1"></a>        }</span>
+<span id="cb11-21"><a href="#cb11-21" tabindex="-1"></a>      }</span>
+<span id="cb11-22"><a href="#cb11-22" tabindex="-1"></a>    },</span>
+<span id="cb11-23"><a href="#cb11-23" tabindex="-1"></a>    {</span>
+<span id="cb11-24"><a href="#cb11-24" tabindex="-1"></a>      <span class="st">"name"</span><span class="sc">:</span> [<span class="st">"compensate"</span>],</span>
+<span id="cb11-25"><a href="#cb11-25" tabindex="-1"></a>      <span class="st">"FUN"</span><span class="sc">:</span> [<span class="st">"compensateFromMatrix"</span>],</span>
+<span id="cb11-26"><a href="#cb11-26" tabindex="-1"></a>      <span class="st">"ARGS"</span><span class="sc">:</span> {</span>
+<span id="cb11-27"><a href="#cb11-27" tabindex="-1"></a>        <span class="st">"matrixSource"</span><span class="sc">:</span> [<span class="st">"fcs"</span>]</span>
+<span id="cb11-28"><a href="#cb11-28" tabindex="-1"></a>      }</span>
+<span id="cb11-29"><a href="#cb11-29" tabindex="-1"></a>    },</span>
+<span id="cb11-30"><a href="#cb11-30" tabindex="-1"></a>    {</span>
+<span id="cb11-31"><a href="#cb11-31" tabindex="-1"></a>      <span class="st">"name"</span><span class="sc">:</span> [<span class="st">"flowframe_aggregate"</span>],</span>
+<span id="cb11-32"><a href="#cb11-32" tabindex="-1"></a>      <span class="st">"FUN"</span><span class="sc">:</span> [<span class="st">"aggregateAndSample"</span>],</span>
+<span id="cb11-33"><a href="#cb11-33" tabindex="-1"></a>      <span class="st">"ARGS"</span><span class="sc">:</span> {</span>
+<span id="cb11-34"><a href="#cb11-34" tabindex="-1"></a>        <span class="st">"nTotalEvents"</span><span class="sc">:</span> [<span class="dv">10000</span>],</span>
+<span id="cb11-35"><a href="#cb11-35" tabindex="-1"></a>        <span class="st">"seed"</span><span class="sc">:</span> [<span class="dv">0</span>]</span>
+<span id="cb11-36"><a href="#cb11-36" tabindex="-1"></a>      }</span>
+<span id="cb11-37"><a href="#cb11-37" tabindex="-1"></a>    },</span>
+<span id="cb11-38"><a href="#cb11-38" tabindex="-1"></a>    {</span>
+<span id="cb11-39"><a href="#cb11-39" tabindex="-1"></a>      <span class="st">"name"</span><span class="sc">:</span> [<span class="st">"scale_transform_estimate"</span>],</span>
+<span id="cb11-40"><a href="#cb11-40" tabindex="-1"></a>      <span class="st">"FUN"</span><span class="sc">:</span> [<span class="st">"estimateScaleTransforms"</span>],</span>
+<span id="cb11-41"><a href="#cb11-41" tabindex="-1"></a>      <span class="st">"ARGS"</span><span class="sc">:</span> {</span>
+<span id="cb11-42"><a href="#cb11-42" tabindex="-1"></a>        <span class="st">"fluoMethod"</span><span class="sc">:</span> [<span class="st">"estimateLogicle"</span>],</span>
+<span id="cb11-43"><a href="#cb11-43" tabindex="-1"></a>        <span class="st">"scatterMethod"</span><span class="sc">:</span> [<span class="st">"linearQuantile"</span>],</span>
+<span id="cb11-44"><a href="#cb11-44" tabindex="-1"></a>        <span class="st">"scatterRefMarker"</span><span class="sc">:</span> [<span class="st">"CD4"</span>]</span>
+<span id="cb11-45"><a href="#cb11-45" tabindex="-1"></a>      }</span>
+<span id="cb11-46"><a href="#cb11-46" tabindex="-1"></a>    }</span>
+<span id="cb11-47"><a href="#cb11-47" tabindex="-1"></a>  ],</span>
+<span id="cb11-48"><a href="#cb11-48" tabindex="-1"></a>  <span class="st">"flowFramesPreProcessingSteps"</span><span class="sc">:</span> [</span>
+<span id="cb11-49"><a href="#cb11-49" tabindex="-1"></a>    {</span>
+<span id="cb11-50"><a href="#cb11-50" tabindex="-1"></a>      <span class="st">"name"</span><span class="sc">:</span> [<span class="st">"flowframe_read"</span>],</span>
+<span id="cb11-51"><a href="#cb11-51" tabindex="-1"></a>      <span class="st">"FUN"</span><span class="sc">:</span> [<span class="st">"readSampleFiles"</span>],</span>
+<span id="cb11-52"><a href="#cb11-52" tabindex="-1"></a>      <span class="st">"ARGS"</span><span class="sc">:</span> {</span>
+<span id="cb11-53"><a href="#cb11-53" tabindex="-1"></a>        <span class="st">"truncate_max_range"</span><span class="sc">:</span> [false],</span>
+<span id="cb11-54"><a href="#cb11-54" tabindex="-1"></a>        <span class="st">"min.limit"</span><span class="sc">:</span> null</span>
+<span id="cb11-55"><a href="#cb11-55" tabindex="-1"></a>      }</span>
+<span id="cb11-56"><a href="#cb11-56" tabindex="-1"></a>    }, </span>
+<span id="cb11-57"><a href="#cb11-57" tabindex="-1"></a>    {</span>
+<span id="cb11-58"><a href="#cb11-58" tabindex="-1"></a>      <span class="st">"name"</span><span class="sc">:</span> [<span class="st">"remove_margins"</span>],</span>
+<span id="cb11-59"><a href="#cb11-59" tabindex="-1"></a>      <span class="st">"FUN"</span><span class="sc">:</span> [<span class="st">"removeMarginsPeacoQC"</span>],</span>
+<span id="cb11-60"><a href="#cb11-60" tabindex="-1"></a>      <span class="st">"ARGS"</span><span class="sc">:</span> {</span>
+<span id="cb11-61"><a href="#cb11-61" tabindex="-1"></a>        <span class="st">"channelSpecifications"</span><span class="sc">:</span> {</span>
+<span id="cb11-62"><a href="#cb11-62" tabindex="-1"></a>          <span class="st">"AllFluoChannels"</span><span class="sc">:</span> [<span class="sc">-</span><span class="dv">300</span>, <span class="dv">262144</span>]</span>
+<span id="cb11-63"><a href="#cb11-63" tabindex="-1"></a>        }</span>
+<span id="cb11-64"><a href="#cb11-64" tabindex="-1"></a>      }</span>
+<span id="cb11-65"><a href="#cb11-65" tabindex="-1"></a>    },  </span>
+<span id="cb11-66"><a href="#cb11-66" tabindex="-1"></a>    {</span>
+<span id="cb11-67"><a href="#cb11-67" tabindex="-1"></a>      <span class="st">"name"</span><span class="sc">:</span> [<span class="st">"compensate"</span>],</span>
+<span id="cb11-68"><a href="#cb11-68" tabindex="-1"></a>      <span class="st">"FUN"</span><span class="sc">:</span> [<span class="st">"compensateFromMatrix"</span>],</span>
+<span id="cb11-69"><a href="#cb11-69" tabindex="-1"></a>      <span class="st">"ARGS"</span><span class="sc">:</span> {</span>
+<span id="cb11-70"><a href="#cb11-70" tabindex="-1"></a>        <span class="st">"matrixSource"</span><span class="sc">:</span> [<span class="st">"fcs"</span>]</span>
+<span id="cb11-71"><a href="#cb11-71" tabindex="-1"></a>      }</span>
+<span id="cb11-72"><a href="#cb11-72" tabindex="-1"></a>    },</span>
+<span id="cb11-73"><a href="#cb11-73" tabindex="-1"></a>    {</span>
+<span id="cb11-74"><a href="#cb11-74" tabindex="-1"></a>      <span class="st">"name"</span><span class="sc">:</span> [<span class="st">"perform_QC"</span>],</span>
+<span id="cb11-75"><a href="#cb11-75" tabindex="-1"></a>      <span class="st">"FUN"</span><span class="sc">:</span> [<span class="st">"qualityControlPeacoQC"</span>],</span>
+<span id="cb11-76"><a href="#cb11-76" tabindex="-1"></a>      <span class="st">"ARGS"</span><span class="sc">:</span> {</span>
+<span id="cb11-77"><a href="#cb11-77" tabindex="-1"></a>        <span class="st">"preTransform"</span><span class="sc">:</span> [true],</span>
+<span id="cb11-78"><a href="#cb11-78" tabindex="-1"></a>        <span class="st">"min_cells"</span><span class="sc">:</span> [<span class="dv">150</span>],</span>
+<span id="cb11-79"><a href="#cb11-79" tabindex="-1"></a>        <span class="st">"max_bins"</span><span class="sc">:</span> [<span class="dv">500</span>],</span>
+<span id="cb11-80"><a href="#cb11-80" tabindex="-1"></a>        <span class="st">"step"</span><span class="sc">:</span> [<span class="dv">500</span>],</span>
+<span id="cb11-81"><a href="#cb11-81" tabindex="-1"></a>        <span class="st">"MAD"</span><span class="sc">:</span> [<span class="dv">6</span>],</span>
+<span id="cb11-82"><a href="#cb11-82" tabindex="-1"></a>        <span class="st">"IT_limit"</span><span class="sc">:</span> [<span class="fl">0.55</span>],</span>
+<span id="cb11-83"><a href="#cb11-83" tabindex="-1"></a>        <span class="st">"force_IT"</span><span class="sc">:</span> [<span class="dv">150</span>],</span>
+<span id="cb11-84"><a href="#cb11-84" tabindex="-1"></a>        <span class="st">"peak_removal"</span><span class="sc">:</span> [<span class="fl">0.3333</span>],</span>
+<span id="cb11-85"><a href="#cb11-85" tabindex="-1"></a>        <span class="st">"min_nr_bins_peakdetection"</span><span class="sc">:</span> [<span class="dv">10</span>]</span>
 <span id="cb11-86"><a href="#cb11-86" tabindex="-1"></a>      }</span>
 <span id="cb11-87"><a href="#cb11-87" tabindex="-1"></a>    },</span>
 <span id="cb11-88"><a href="#cb11-88" tabindex="-1"></a>    {</span>
-<span id="cb11-89"><a href="#cb11-89" tabindex="-1"></a>      <span class="st">"name"</span><span class="sc">:</span> [<span class="st">"remove_debris"</span>],</span>
-<span id="cb11-90"><a href="#cb11-90" tabindex="-1"></a>      <span class="st">"FUN"</span><span class="sc">:</span> [<span class="st">"removeDebrisFlowClustTmix"</span>],</span>
+<span id="cb11-89"><a href="#cb11-89" tabindex="-1"></a>      <span class="st">"name"</span><span class="sc">:</span> [<span class="st">"remove_doublets"</span>],</span>
+<span id="cb11-90"><a href="#cb11-90" tabindex="-1"></a>      <span class="st">"FUN"</span><span class="sc">:</span> [<span class="st">"removeDoubletsCytoPipeline"</span>],</span>
 <span id="cb11-91"><a href="#cb11-91" tabindex="-1"></a>      <span class="st">"ARGS"</span><span class="sc">:</span> {</span>
-<span id="cb11-92"><a href="#cb11-92" tabindex="-1"></a>        <span class="st">"FSCChannel"</span><span class="sc">:</span> [<span class="st">"FSC-A"</span>],</span>
-<span id="cb11-93"><a href="#cb11-93" tabindex="-1"></a>        <span class="st">"SSCChannel"</span><span class="sc">:</span> [<span class="st">"SSC-A"</span>],</span>
-<span id="cb11-94"><a href="#cb11-94" tabindex="-1"></a>        <span class="st">"nClust"</span><span class="sc">:</span> [<span class="dv">2</span>],</span>
-<span id="cb11-95"><a href="#cb11-95" tabindex="-1"></a>        <span class="st">"level"</span><span class="sc">:</span> [<span class="fl">0.97</span>],</span>
-<span id="cb11-96"><a href="#cb11-96" tabindex="-1"></a>        <span class="st">"B"</span><span class="sc">:</span> [<span class="dv">100</span>]}</span>
-<span id="cb11-97"><a href="#cb11-97" tabindex="-1"></a>    },</span>
-<span id="cb11-98"><a href="#cb11-98" tabindex="-1"></a>    {</span>
-<span id="cb11-99"><a href="#cb11-99" tabindex="-1"></a>      <span class="st">"name"</span><span class="sc">:</span> [<span class="st">"compensate"</span>],</span>
-<span id="cb11-100"><a href="#cb11-100" tabindex="-1"></a>      <span class="st">"FUN"</span><span class="sc">:</span> [<span class="st">"compensateFromMatrix"</span>],</span>
-<span id="cb11-101"><a href="#cb11-101" tabindex="-1"></a>      <span class="st">"ARGS"</span><span class="sc">:</span> {</span>
-<span id="cb11-102"><a href="#cb11-102" tabindex="-1"></a>        <span class="st">"matrixSource"</span><span class="sc">:</span> [<span class="st">"fcs"</span>]</span>
-<span id="cb11-103"><a href="#cb11-103" tabindex="-1"></a>      }</span>
-<span id="cb11-104"><a href="#cb11-104" tabindex="-1"></a>    }</span>
-<span id="cb11-105"><a href="#cb11-105" tabindex="-1"></a>  ]  </span>
-<span id="cb11-106"><a href="#cb11-106" tabindex="-1"></a>}</span></code></pre></div>
+<span id="cb11-92"><a href="#cb11-92" tabindex="-1"></a>        <span class="st">"areaChannels"</span><span class="sc">:</span> [<span class="st">"FSC-A"</span>],</span>
+<span id="cb11-93"><a href="#cb11-93" tabindex="-1"></a>        <span class="st">"heightChannels"</span><span class="sc">:</span> [<span class="st">"FSC-H"</span>],</span>
+<span id="cb11-94"><a href="#cb11-94" tabindex="-1"></a>        <span class="st">"nmads"</span><span class="sc">:</span> [<span class="dv">3</span>]</span>
+<span id="cb11-95"><a href="#cb11-95" tabindex="-1"></a>      }</span>
+<span id="cb11-96"><a href="#cb11-96" tabindex="-1"></a>    },</span>
+<span id="cb11-97"><a href="#cb11-97" tabindex="-1"></a>    {</span>
+<span id="cb11-98"><a href="#cb11-98" tabindex="-1"></a>      <span class="st">"name"</span><span class="sc">:</span> [<span class="st">"remove_debris"</span>],</span>
+<span id="cb11-99"><a href="#cb11-99" tabindex="-1"></a>      <span class="st">"FUN"</span><span class="sc">:</span> [<span class="st">"removeDebrisFlowClustTmix"</span>],</span>
+<span id="cb11-100"><a href="#cb11-100" tabindex="-1"></a>      <span class="st">"ARGS"</span><span class="sc">:</span> {</span>
+<span id="cb11-101"><a href="#cb11-101" tabindex="-1"></a>        <span class="st">"FSCChannel"</span><span class="sc">:</span> [<span class="st">"FSC-A"</span>],</span>
+<span id="cb11-102"><a href="#cb11-102" tabindex="-1"></a>        <span class="st">"SSCChannel"</span><span class="sc">:</span> [<span class="st">"SSC-A"</span>],</span>
+<span id="cb11-103"><a href="#cb11-103" tabindex="-1"></a>        <span class="st">"nClust"</span><span class="sc">:</span> [<span class="dv">3</span>],</span>
+<span id="cb11-104"><a href="#cb11-104" tabindex="-1"></a>        <span class="st">"level"</span><span class="sc">:</span> [<span class="fl">0.97</span>],</span>
+<span id="cb11-105"><a href="#cb11-105" tabindex="-1"></a>        <span class="st">"B"</span><span class="sc">:</span> [<span class="dv">100</span>]}</span>
+<span id="cb11-106"><a href="#cb11-106" tabindex="-1"></a>    },</span>
+<span id="cb11-107"><a href="#cb11-107" tabindex="-1"></a>    {</span>
+<span id="cb11-108"><a href="#cb11-108" tabindex="-1"></a>      <span class="st">"name"</span><span class="sc">:</span> [<span class="st">"remove_dead_cells"</span>],</span>
+<span id="cb11-109"><a href="#cb11-109" tabindex="-1"></a>      <span class="st">"FUN"</span><span class="sc">:</span> [<span class="st">"removeDeadCellsDeGate"</span>],</span>
+<span id="cb11-110"><a href="#cb11-110" tabindex="-1"></a>      <span class="st">"ARGS"</span><span class="sc">:</span> {</span>
+<span id="cb11-111"><a href="#cb11-111" tabindex="-1"></a>        <span class="st">"preTransform"</span><span class="sc">:</span> [true],</span>
+<span id="cb11-112"><a href="#cb11-112" tabindex="-1"></a>        <span class="st">"LDMarker"</span><span class="sc">:</span> [<span class="st">"L/D Aqua - Viability"</span>]</span>
+<span id="cb11-113"><a href="#cb11-113" tabindex="-1"></a>      }</span>
+<span id="cb11-114"><a href="#cb11-114" tabindex="-1"></a>    }</span>
+<span id="cb11-115"><a href="#cb11-115" tabindex="-1"></a>  ]  </span>
+<span id="cb11-116"><a href="#cb11-116" tabindex="-1"></a>} </span></code></pre></div>
 <p>Let us now create a new CytoPipeline object, and execute it.</p>
 <div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># 4.</span></span>
 <span><span class="co"># creation of a new CytoPipeline object,</span></span>
 <span><span class="co"># using json file as input (flowAI)</span></span>
-<span><span class="va">pipL_flowAI</span> <span class="op">&lt;-</span> <span class="fu">CytoPipeline</span><span class="op">(</span><span class="va">jsonFile</span>,</span>
-<span>                            experimentName <span class="op">=</span> <span class="st">"CytoPipeline_Demo_flowAI"</span>,</span>
-<span>                            sampleFiles <span class="op">=</span> <span class="va">mySamples</span><span class="op">)</span></span>
+<span><span class="va">pipL_PQC</span> <span class="op">&lt;-</span> <span class="fu">CytoPipeline</span><span class="op">(</span><span class="va">jsonFile</span>,</span>
+<span>                         experimentName <span class="op">=</span> <span class="st">"CytoPipeline_Demo_PQC"</span>,</span>
+<span>                         sampleFiles <span class="op">=</span> <span class="va">mySamples</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># display CytoPipeline object</span></span>
-<span><span class="va">pipL_flowAI</span></span>
-<span><span class="co">#&gt; Pipeline object for flow cytometry experiment: CytoPipeline_Demo_flowAI </span></span>
+<span><span class="va">pipL_PQC</span></span>
+<span><span class="co">#&gt; Pipeline object for flow cytometry experiment: CytoPipeline_Demo_PQC </span></span>
 <span><span class="co">#&gt; Sample files: 2 sample file(s)</span></span>
 <span><span class="co">#&gt; No pheno data</span></span>
 <span><span class="co">#&gt; Scale transformations evaluation queue : 5 processing step(s)</span></span>
@@ -968,6 +1040,8 @@ described in the following json file:</p>
 <span><span class="co">#&gt; 2 :Object of class "CytoProcessingStep"</span></span>
 <span><span class="co">#&gt;  Name: remove_margins</span></span>
 <span><span class="co">#&gt;  Function: removeMarginsPeacoQC</span></span>
+<span><span class="co">#&gt;  Arguments:</span></span>
+<span><span class="co">#&gt;   o channelSpecifications = c(-300, 262144)</span></span>
 <span><span class="co">#&gt; 3 :Object of class "CytoProcessingStep"</span></span>
 <span><span class="co">#&gt;  Name: compensate</span></span>
 <span><span class="co">#&gt;  Function: compensateFromMatrix</span></span>
@@ -986,7 +1060,7 @@ described in the following json file:</p>
 <span><span class="co">#&gt;   o fluoMethod = estimateLogicle</span></span>
 <span><span class="co">#&gt;   o scatterMethod = linearQuantile</span></span>
 <span><span class="co">#&gt;   o scatterRefMarker = CD4</span></span>
-<span><span class="co">#&gt; Flow frames pre-processing evaluation queue : 6 processing step(s)</span></span>
+<span><span class="co">#&gt; Flow frames pre-processing evaluation queue : 7 processing step(s)</span></span>
 <span><span class="co">#&gt; 1 :Object of class "CytoProcessingStep"</span></span>
 <span><span class="co">#&gt;  Name: flowframe_read</span></span>
 <span><span class="co">#&gt;  Function: readSampleFiles</span></span>
@@ -999,105 +1073,130 @@ described in the following json file:</p>
 <span><span class="co">#&gt;  Arguments:</span></span>
 <span><span class="co">#&gt;   o channelSpecifications = c(-300, 262144)</span></span>
 <span><span class="co">#&gt; 3 :Object of class "CytoProcessingStep"</span></span>
-<span><span class="co">#&gt;  Name: perform_QC</span></span>
-<span><span class="co">#&gt;  Function: qualityControlFlowAI</span></span>
+<span><span class="co">#&gt;  Name: compensate</span></span>
+<span><span class="co">#&gt;  Function: compensateFromMatrix</span></span>
 <span><span class="co">#&gt;  Arguments:</span></span>
-<span><span class="co">#&gt;   o preTransform = FALSE</span></span>
-<span><span class="co">#&gt;   o remove_from = all</span></span>
-<span><span class="co">#&gt;   o second_fractionFR = 0.1</span></span>
-<span><span class="co">#&gt;   o deviationFR = MAD</span></span>
-<span><span class="co">#&gt;   o alphaFR = 0.01</span></span>
-<span><span class="co">#&gt;   o decompFR = TRUE</span></span>
-<span><span class="co">#&gt;   o outlier_binsFS = FALSE</span></span>
-<span><span class="co">#&gt;   o pen_valueFS = 200</span></span>
-<span><span class="co">#&gt;   o max_cptFS = 3</span></span>
-<span><span class="co">#&gt;   o sideFM = both</span></span>
-<span><span class="co">#&gt;   o neg_valuesFM = 1</span></span>
+<span><span class="co">#&gt;   o matrixSource = fcs</span></span>
 <span><span class="co">#&gt; 4 :Object of class "CytoProcessingStep"</span></span>
+<span><span class="co">#&gt;  Name: perform_QC</span></span>
+<span><span class="co">#&gt;  Function: qualityControlPeacoQC</span></span>
+<span><span class="co">#&gt;  Arguments:</span></span>
+<span><span class="co">#&gt;   o preTransform = TRUE</span></span>
+<span><span class="co">#&gt;   o min_cells = 150</span></span>
+<span><span class="co">#&gt;   o max_bins = 500</span></span>
+<span><span class="co">#&gt;   o step = 500</span></span>
+<span><span class="co">#&gt;   o MAD = 6</span></span>
+<span><span class="co">#&gt;   o IT_limit = 0.55</span></span>
+<span><span class="co">#&gt;   o force_IT = 150</span></span>
+<span><span class="co">#&gt;   o peak_removal = 0.3333</span></span>
+<span><span class="co">#&gt;   o min_nr_bins_peakdetection = 10</span></span>
+<span><span class="co">#&gt; 5 :Object of class "CytoProcessingStep"</span></span>
 <span><span class="co">#&gt;  Name: remove_doublets</span></span>
 <span><span class="co">#&gt;  Function: removeDoubletsCytoPipeline</span></span>
 <span><span class="co">#&gt;  Arguments:</span></span>
 <span><span class="co">#&gt;   o areaChannels = FSC-A</span></span>
 <span><span class="co">#&gt;   o heightChannels = FSC-H</span></span>
 <span><span class="co">#&gt;   o nmads = 3</span></span>
-<span><span class="co">#&gt; 5 :Object of class "CytoProcessingStep"</span></span>
+<span><span class="co">#&gt; 6 :Object of class "CytoProcessingStep"</span></span>
 <span><span class="co">#&gt;  Name: remove_debris</span></span>
 <span><span class="co">#&gt;  Function: removeDebrisFlowClustTmix</span></span>
 <span><span class="co">#&gt;  Arguments:</span></span>
 <span><span class="co">#&gt;   o FSCChannel = FSC-A</span></span>
 <span><span class="co">#&gt;   o SSCChannel = SSC-A</span></span>
-<span><span class="co">#&gt;   o nClust = 2</span></span>
+<span><span class="co">#&gt;   o nClust = 3</span></span>
 <span><span class="co">#&gt;   o level = 0.97</span></span>
 <span><span class="co">#&gt;   o B = 100</span></span>
-<span><span class="co">#&gt; 6 :Object of class "CytoProcessingStep"</span></span>
-<span><span class="co">#&gt;  Name: compensate</span></span>
-<span><span class="co">#&gt;  Function: compensateFromMatrix</span></span>
+<span><span class="co">#&gt; 7 :Object of class "CytoProcessingStep"</span></span>
+<span><span class="co">#&gt;  Name: remove_dead_cells</span></span>
+<span><span class="co">#&gt;  Function: removeDeadCellsDeGate</span></span>
 <span><span class="co">#&gt;  Arguments:</span></span>
-<span><span class="co">#&gt;   o matrixSource = fcs</span></span>
+<span><span class="co">#&gt;   o preTransform = TRUE</span></span>
+<span><span class="co">#&gt;   o LDMarker = L/D Aqua - Viability</span></span>
 <span></span>
 <span><span class="co"># execute pipeline</span></span>
-<span><span class="fu">execute</span><span class="op">(</span><span class="va">pipL_flowAI</span>, path <span class="op">=</span> <span class="va">resultsDir</span><span class="op">)</span></span>
+<span><span class="fu">execute</span><span class="op">(</span><span class="va">pipL_PQC</span>, path <span class="op">=</span> <span class="va">resultsDir</span><span class="op">)</span></span>
 <span><span class="co">#&gt; #####################################################</span></span>
 <span><span class="co">#&gt; ### running SCALE TRANSFORMATION processing steps ###</span></span>
 <span><span class="co">#&gt; #####################################################</span></span>
 <span><span class="co">#&gt; Proceeding with step 1 [flowframe_read] ...</span></span>
 <span><span class="co">#&gt; Proceeding with step 2 [remove_margins] ...</span></span>
-<span><span class="co">#&gt; Removing margins from file : D91_G01.fcs</span></span>
-<span><span class="co">#&gt; Removing margins from file : D91_A01.fcs</span></span>
+<span><span class="co">#&gt; Removing margins from file : Donor1.fcs</span></span>
+<span><span class="co">#&gt; Removing margins from file : Donor2.fcs</span></span>
 <span><span class="co">#&gt; Proceeding with step 3 [compensate] ...</span></span>
-<span><span class="co">#&gt; Compensating file : D91_G01.fcs</span></span>
-<span><span class="co">#&gt; Compensating file : D91_A01.fcs</span></span>
+<span><span class="co">#&gt; Compensating file : Donor1.fcs</span></span>
+<span><span class="co">#&gt; Compensating file : Donor2.fcs</span></span>
 <span><span class="co">#&gt; Proceeding with step 4 [flowframe_aggregate] ...</span></span>
 <span><span class="co">#&gt; Proceeding with step 5 [scale_transform_estimate] ...</span></span>
 <span><span class="co">#&gt; estimating logicle transformations for fluorochrome channels...</span></span>
 <span><span class="co">#&gt; Estimating linear transformation for scatter channels : reference marker = CD4...</span></span>
 <span><span class="co">#&gt; applying specific linear transformation for FSC-A channel...</span></span>
-<span><span class="co">#&gt; initial quantiles : q5 = 2428.4839 ; q95 = 171164.6242</span></span>
-<span><span class="co">#&gt; target quantiles : q5 = 0.1851 ; q95 = 1.5152</span></span>
-<span><span class="co">#&gt; a = 7.88e-06 ; b = 1.66e-01</span></span>
+<span><span class="co">#&gt; initial quantiles : q5 = 15825.9604 ; q95 = 182291.0469</span></span>
+<span><span class="co">#&gt; target quantiles : q5 = 0.4556 ; q95 = 2.8719</span></span>
+<span><span class="co">#&gt; a = 1.45e-05 ; b = 2.26e-01</span></span>
 <span><span class="co">#&gt; applying FSC-A linear transformation for FSC-H channel...</span></span>
 <span><span class="co">#&gt; applying specific linear transformation for SSC-A channel...</span></span>
-<span><span class="co">#&gt; initial quantiles : q5 = 8792.7513 ; q95 = 85456.8254</span></span>
-<span><span class="co">#&gt; target quantiles : q5 = 0.1851 ; q95 = 1.5152</span></span>
-<span><span class="co">#&gt; a = 1.73e-05 ; b = 3.26e-02</span></span>
+<span><span class="co">#&gt; initial quantiles : q5 = 23846.3145 ; q95 = 222903.9688</span></span>
+<span><span class="co">#&gt; target quantiles : q5 = 0.4556 ; q95 = 2.8719</span></span>
+<span><span class="co">#&gt; a = 1.21e-05 ; b = 1.66e-01</span></span>
+<span><span class="co">#&gt; applying SSC-A linear transformation for SSC-H channel...</span></span>
 <span><span class="co">#&gt; #####################################################</span></span>
-<span><span class="co">#&gt; ### NOW PRE-PROCESSING FILE ./rawData/D91_G01.fcs...</span></span>
-<span><span class="co">#&gt; #####################################################</span></span>
-<span><span class="co">#&gt; Proceeding with step 1 [flowframe_read] ...</span></span>
-<span><span class="co">#&gt; Proceeding with step 2 [remove_margins] ...</span></span>
-<span><span class="co">#&gt; Removing margins from file : D91_G01.fcs</span></span>
-<span><span class="co">#&gt; Proceeding with step 3 [perform_QC] ...</span></span>
-<span><span class="co">#&gt; Applying flowAI method...</span></span>
-<span><span class="co">#&gt; Quality control for the file: d3d019b7-c433-4b38-9cbc-c13afe66e623</span></span>
-<span><span class="co">#&gt; 5.3% of anomalous cells detected in the flow rate check. </span></span>
-<span><span class="co">#&gt; 0% of anomalous cells detected in signal acquisition check. </span></span>
-<span><span class="co">#&gt; 0.71% of anomalous cells detected in the dynamic range check.</span></span>
-<span><span class="co">#&gt; Proceeding with step 4 [remove_doublets] ...</span></span>
-<span><span class="co">#&gt; Proceeding with step 5 [remove_debris] ...</span></span>
-<span><span class="co">#&gt; The prior specification has no effect when usePrior=no</span></span>
-<span><span class="co">#&gt; Using the serial version of flowClust</span></span>
-<span><span class="co">#&gt; Proceeding with step 6 [compensate] ...</span></span>
-<span><span class="co">#&gt; Compensating file : D91_G01.fcs</span></span>
-<span><span class="co">#&gt; #####################################################</span></span>
-<span><span class="co">#&gt; ### NOW PRE-PROCESSING FILE ./rawData/D91_A01.fcs...</span></span>
+<span><span class="co">#&gt; ### NOW PRE-PROCESSING FILE /usr/local/lib/R/site-library/CytoPipeline/extdata/Donor1.fcs...</span></span>
 <span><span class="co">#&gt; #####################################################</span></span>
 <span><span class="co">#&gt; Proceeding with step 1 [flowframe_read] ...</span></span>
 <span><span class="co">#&gt; Proceeding with step 2 [remove_margins] ...</span></span>
-<span><span class="co">#&gt; Removing margins from file : D91_A01.fcs</span></span>
-<span><span class="co">#&gt; Proceeding with step 3 [perform_QC] ...</span></span>
-<span><span class="co">#&gt; Applying flowAI method...</span></span>
-<span><span class="co">#&gt; Quality control for the file: d8f7c9cd-a4ff-4726-adf5-9ebebdaccc3f</span></span>
-<span><span class="co">#&gt; 13.23% of anomalous cells detected in the flow rate check. </span></span>
-<span><span class="co">#&gt; 18.94% of anomalous cells detected in signal acquisition check. </span></span>
-<span><span class="co">#&gt; 0.65% of anomalous cells detected in the dynamic range check.</span></span>
-<span><span class="co">#&gt; Proceeding with step 4 [remove_doublets] ...</span></span>
-<span><span class="co">#&gt; Proceeding with step 5 [remove_debris] ...</span></span>
+<span><span class="co">#&gt; Removing margins from file : Donor1.fcs</span></span>
+<span><span class="co">#&gt; Proceeding with step 3 [compensate] ...</span></span>
+<span><span class="co">#&gt; Compensating file : Donor1.fcs</span></span>
+<span><span class="co">#&gt; Proceeding with step 4 [perform_QC] ...</span></span>
+<span><span class="co">#&gt; Applying PeacoQC method...</span></span>
+<span><span class="co">#&gt; Warning in CheckInputSignalStability(ff, channels, determine_good_cells, :</span></span>
+<span><span class="co">#&gt; There is an inconsistancy in the time channel.  It seems that not all the cells</span></span>
+<span><span class="co">#&gt; are ordered according to time in the flowframe.</span></span>
+<span><span class="co">#&gt; Starting quality control analysis for Donor1.fcs</span></span>
+<span><span class="co">#&gt; Warning in FindIncreasingDecreasingChannels(breaks, ff, channels, plot, : There</span></span>
+<span><span class="co">#&gt; seems to be an increasing or decreasing trend in a channel for Donor1.fcs .</span></span>
+<span><span class="co">#&gt; Please inspect this in the overview figure.</span></span>
+<span><span class="co">#&gt; Calculating peaks</span></span>
+<span><span class="co">#&gt; Warning in PeacoQC::PeacoQC(ff = ffIn, channels = channel4QualityControl, :</span></span>
+<span><span class="co">#&gt; There are not enough bins for a robust isolation tree analysis.</span></span>
+<span><span class="co">#&gt; MAD analysis removed 5.32% of the measurements</span></span>
+<span><span class="co">#&gt; The algorithm removed 5.32% of the measurements</span></span>
+<span><span class="co">#&gt; Proceeding with step 5 [remove_doublets] ...</span></span>
+<span><span class="co">#&gt; Proceeding with step 6 [remove_debris] ...</span></span>
 <span><span class="co">#&gt; The prior specification has no effect when usePrior=no</span></span>
 <span><span class="co">#&gt; Using the serial version of flowClust</span></span>
-<span><span class="co">#&gt; Proceeding with step 6 [compensate] ...</span></span>
-<span><span class="co">#&gt; Compensating file : D91_A01.fcs</span></span>
+<span><span class="co">#&gt; Proceeding with step 7 [remove_dead_cells] ...</span></span>
+<span><span class="co">#&gt; Removing Dead Cells events (using flowDensity::deGate()) from file : Donor1.fcs</span></span>
+<span><span class="co">#&gt; #####################################################</span></span>
+<span><span class="co">#&gt; ### NOW PRE-PROCESSING FILE /usr/local/lib/R/site-library/CytoPipeline/extdata/Donor2.fcs...</span></span>
+<span><span class="co">#&gt; #####################################################</span></span>
+<span><span class="co">#&gt; Proceeding with step 1 [flowframe_read] ...</span></span>
+<span><span class="co">#&gt; Proceeding with step 2 [remove_margins] ...</span></span>
+<span><span class="co">#&gt; Removing margins from file : Donor2.fcs</span></span>
+<span><span class="co">#&gt; Proceeding with step 3 [compensate] ...</span></span>
+<span><span class="co">#&gt; Compensating file : Donor2.fcs</span></span>
+<span><span class="co">#&gt; Proceeding with step 4 [perform_QC] ...</span></span>
+<span><span class="co">#&gt; Applying PeacoQC method...</span></span>
+<span><span class="co">#&gt; Warning in CheckInputSignalStability(ff, channels, determine_good_cells, :</span></span>
+<span><span class="co">#&gt; There is an inconsistancy in the time channel.  It seems that not all the cells</span></span>
+<span><span class="co">#&gt; are ordered according to time in the flowframe.</span></span>
+<span><span class="co">#&gt; Starting quality control analysis for Donor2.fcs</span></span>
+<span><span class="co">#&gt; Warning in FindIncreasingDecreasingChannels(breaks, ff, channels, plot, : There</span></span>
+<span><span class="co">#&gt; seems to be an increasing or decreasing trend in a channel for Donor2.fcs .</span></span>
+<span><span class="co">#&gt; Please inspect this in the overview figure.</span></span>
+<span><span class="co">#&gt; Calculating peaks</span></span>
+<span><span class="co">#&gt; Warning in PeacoQC::PeacoQC(ff = ffIn, channels = channel4QualityControl, :</span></span>
+<span><span class="co">#&gt; There are not enough bins for a robust isolation tree analysis.</span></span>
+<span><span class="co">#&gt; MAD analysis removed 1% of the measurements</span></span>
+<span><span class="co">#&gt; The algorithm removed 1% of the measurements</span></span>
+<span><span class="co">#&gt; Proceeding with step 5 [remove_doublets] ...</span></span>
+<span><span class="co">#&gt; Proceeding with step 6 [remove_debris] ...</span></span>
+<span><span class="co">#&gt; The prior specification has no effect when usePrior=no</span></span>
+<span><span class="co">#&gt; Using the serial version of flowClust</span></span>
+<span><span class="co">#&gt; Proceeding with step 7 [remove_dead_cells] ...</span></span>
+<span><span class="co">#&gt; Removing Dead Cells events (using flowDensity::deGate()) from file : Donor2.fcs</span></span>
 <span></span>
-<span><span class="fu">plotCytoPipelineProcessingQueue</span><span class="op">(</span><span class="va">pipL_flowAI</span>, </span>
+<span><span class="fu">plotCytoPipelineProcessingQueue</span><span class="op">(</span><span class="va">pipL_PQC</span>, </span>
 <span>                                whichQueue <span class="op">=</span> <span class="st">"pre-processing"</span>,</span>
 <span>                                path <span class="op">=</span> <span class="va">resultsDir</span>,</span>
 <span>                                sampleFile <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span></code></pre></div>
@@ -1147,68 +1246,89 @@ the same experiment id, but with an amended pipeline definition.</p>
 <div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># 6a. execute pipeline with rmCache = TRUE</span></span>
 <span></span>
-<span><span class="fu">execute</span><span class="op">(</span><span class="va">pipL_flowAI</span>, path <span class="op">=</span> <span class="va">resultsDir</span>, rmCache <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Warning in execute(pipL_flowAI, path = resultsDir, rmCache = TRUE): Found a</span></span>
-<span><span class="co">#&gt; previous cache with experiment name CytoPipeline_Demo_flowAI =&gt; removed it</span></span>
+<span><span class="fu">execute</span><span class="op">(</span><span class="va">pipL_PQC</span>, path <span class="op">=</span> <span class="va">resultsDir</span>, rmCache <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Warning in execute(pipL_PQC, path = resultsDir, rmCache = TRUE): Found a</span></span>
+<span><span class="co">#&gt; previous cache with experiment name CytoPipeline_Demo_PQC =&gt; removed it</span></span>
 <span><span class="co">#&gt; #####################################################</span></span>
 <span><span class="co">#&gt; ### running SCALE TRANSFORMATION processing steps ###</span></span>
 <span><span class="co">#&gt; #####################################################</span></span>
 <span><span class="co">#&gt; Proceeding with step 1 [flowframe_read] ...</span></span>
 <span><span class="co">#&gt; Proceeding with step 2 [remove_margins] ...</span></span>
-<span><span class="co">#&gt; Removing margins from file : D91_G01.fcs</span></span>
-<span><span class="co">#&gt; Removing margins from file : D91_A01.fcs</span></span>
+<span><span class="co">#&gt; Removing margins from file : Donor1.fcs</span></span>
+<span><span class="co">#&gt; Removing margins from file : Donor2.fcs</span></span>
 <span><span class="co">#&gt; Proceeding with step 3 [compensate] ...</span></span>
-<span><span class="co">#&gt; Compensating file : D91_G01.fcs</span></span>
-<span><span class="co">#&gt; Compensating file : D91_A01.fcs</span></span>
+<span><span class="co">#&gt; Compensating file : Donor1.fcs</span></span>
+<span><span class="co">#&gt; Compensating file : Donor2.fcs</span></span>
 <span><span class="co">#&gt; Proceeding with step 4 [flowframe_aggregate] ...</span></span>
 <span><span class="co">#&gt; Proceeding with step 5 [scale_transform_estimate] ...</span></span>
 <span><span class="co">#&gt; estimating logicle transformations for fluorochrome channels...</span></span>
 <span><span class="co">#&gt; Estimating linear transformation for scatter channels : reference marker = CD4...</span></span>
 <span><span class="co">#&gt; applying specific linear transformation for FSC-A channel...</span></span>
-<span><span class="co">#&gt; initial quantiles : q5 = 2428.4839 ; q95 = 171164.6242</span></span>
-<span><span class="co">#&gt; target quantiles : q5 = 0.1851 ; q95 = 1.5152</span></span>
-<span><span class="co">#&gt; a = 7.88e-06 ; b = 1.66e-01</span></span>
+<span><span class="co">#&gt; initial quantiles : q5 = 15825.9604 ; q95 = 182291.0469</span></span>
+<span><span class="co">#&gt; target quantiles : q5 = 0.4556 ; q95 = 2.8719</span></span>
+<span><span class="co">#&gt; a = 1.45e-05 ; b = 2.26e-01</span></span>
 <span><span class="co">#&gt; applying FSC-A linear transformation for FSC-H channel...</span></span>
 <span><span class="co">#&gt; applying specific linear transformation for SSC-A channel...</span></span>
-<span><span class="co">#&gt; initial quantiles : q5 = 8792.7513 ; q95 = 85456.8254</span></span>
-<span><span class="co">#&gt; target quantiles : q5 = 0.1851 ; q95 = 1.5152</span></span>
-<span><span class="co">#&gt; a = 1.73e-05 ; b = 3.26e-02</span></span>
+<span><span class="co">#&gt; initial quantiles : q5 = 23846.3145 ; q95 = 222903.9688</span></span>
+<span><span class="co">#&gt; target quantiles : q5 = 0.4556 ; q95 = 2.8719</span></span>
+<span><span class="co">#&gt; a = 1.21e-05 ; b = 1.66e-01</span></span>
+<span><span class="co">#&gt; applying SSC-A linear transformation for SSC-H channel...</span></span>
 <span><span class="co">#&gt; #####################################################</span></span>
-<span><span class="co">#&gt; ### NOW PRE-PROCESSING FILE ./rawData/D91_G01.fcs...</span></span>
-<span><span class="co">#&gt; #####################################################</span></span>
-<span><span class="co">#&gt; Proceeding with step 1 [flowframe_read] ...</span></span>
-<span><span class="co">#&gt; Proceeding with step 2 [remove_margins] ...</span></span>
-<span><span class="co">#&gt; Removing margins from file : D91_G01.fcs</span></span>
-<span><span class="co">#&gt; Proceeding with step 3 [perform_QC] ...</span></span>
-<span><span class="co">#&gt; Applying flowAI method...</span></span>
-<span><span class="co">#&gt; Quality control for the file: d3d019b7-c433-4b38-9cbc-c13afe66e623</span></span>
-<span><span class="co">#&gt; 5.3% of anomalous cells detected in the flow rate check. </span></span>
-<span><span class="co">#&gt; 0% of anomalous cells detected in signal acquisition check. </span></span>
-<span><span class="co">#&gt; 0.71% of anomalous cells detected in the dynamic range check.</span></span>
-<span><span class="co">#&gt; Proceeding with step 4 [remove_doublets] ...</span></span>
-<span><span class="co">#&gt; Proceeding with step 5 [remove_debris] ...</span></span>
-<span><span class="co">#&gt; The prior specification has no effect when usePrior=no</span></span>
-<span><span class="co">#&gt; Using the serial version of flowClust</span></span>
-<span><span class="co">#&gt; Proceeding with step 6 [compensate] ...</span></span>
-<span><span class="co">#&gt; Compensating file : D91_G01.fcs</span></span>
-<span><span class="co">#&gt; #####################################################</span></span>
-<span><span class="co">#&gt; ### NOW PRE-PROCESSING FILE ./rawData/D91_A01.fcs...</span></span>
+<span><span class="co">#&gt; ### NOW PRE-PROCESSING FILE /usr/local/lib/R/site-library/CytoPipeline/extdata/Donor1.fcs...</span></span>
 <span><span class="co">#&gt; #####################################################</span></span>
 <span><span class="co">#&gt; Proceeding with step 1 [flowframe_read] ...</span></span>
 <span><span class="co">#&gt; Proceeding with step 2 [remove_margins] ...</span></span>
-<span><span class="co">#&gt; Removing margins from file : D91_A01.fcs</span></span>
-<span><span class="co">#&gt; Proceeding with step 3 [perform_QC] ...</span></span>
-<span><span class="co">#&gt; Applying flowAI method...</span></span>
-<span><span class="co">#&gt; Quality control for the file: d8f7c9cd-a4ff-4726-adf5-9ebebdaccc3f</span></span>
-<span><span class="co">#&gt; 13.23% of anomalous cells detected in the flow rate check. </span></span>
-<span><span class="co">#&gt; 18.94% of anomalous cells detected in signal acquisition check. </span></span>
-<span><span class="co">#&gt; 0.65% of anomalous cells detected in the dynamic range check.</span></span>
-<span><span class="co">#&gt; Proceeding with step 4 [remove_doublets] ...</span></span>
-<span><span class="co">#&gt; Proceeding with step 5 [remove_debris] ...</span></span>
+<span><span class="co">#&gt; Removing margins from file : Donor1.fcs</span></span>
+<span><span class="co">#&gt; Proceeding with step 3 [compensate] ...</span></span>
+<span><span class="co">#&gt; Compensating file : Donor1.fcs</span></span>
+<span><span class="co">#&gt; Proceeding with step 4 [perform_QC] ...</span></span>
+<span><span class="co">#&gt; Applying PeacoQC method...</span></span>
+<span><span class="co">#&gt; Warning in CheckInputSignalStability(ff, channels, determine_good_cells, :</span></span>
+<span><span class="co">#&gt; There is an inconsistancy in the time channel.  It seems that not all the cells</span></span>
+<span><span class="co">#&gt; are ordered according to time in the flowframe.</span></span>
+<span><span class="co">#&gt; Starting quality control analysis for Donor1.fcs</span></span>
+<span><span class="co">#&gt; Warning in FindIncreasingDecreasingChannels(breaks, ff, channels, plot, : There</span></span>
+<span><span class="co">#&gt; seems to be an increasing or decreasing trend in a channel for Donor1.fcs .</span></span>
+<span><span class="co">#&gt; Please inspect this in the overview figure.</span></span>
+<span><span class="co">#&gt; Calculating peaks</span></span>
+<span><span class="co">#&gt; Warning in PeacoQC::PeacoQC(ff = ffIn, channels = channel4QualityControl, :</span></span>
+<span><span class="co">#&gt; There are not enough bins for a robust isolation tree analysis.</span></span>
+<span><span class="co">#&gt; MAD analysis removed 5.32% of the measurements</span></span>
+<span><span class="co">#&gt; The algorithm removed 5.32% of the measurements</span></span>
+<span><span class="co">#&gt; Proceeding with step 5 [remove_doublets] ...</span></span>
+<span><span class="co">#&gt; Proceeding with step 6 [remove_debris] ...</span></span>
 <span><span class="co">#&gt; The prior specification has no effect when usePrior=no</span></span>
 <span><span class="co">#&gt; Using the serial version of flowClust</span></span>
-<span><span class="co">#&gt; Proceeding with step 6 [compensate] ...</span></span>
-<span><span class="co">#&gt; Compensating file : D91_A01.fcs</span></span></code></pre></div>
+<span><span class="co">#&gt; Proceeding with step 7 [remove_dead_cells] ...</span></span>
+<span><span class="co">#&gt; Removing Dead Cells events (using flowDensity::deGate()) from file : Donor1.fcs</span></span>
+<span><span class="co">#&gt; #####################################################</span></span>
+<span><span class="co">#&gt; ### NOW PRE-PROCESSING FILE /usr/local/lib/R/site-library/CytoPipeline/extdata/Donor2.fcs...</span></span>
+<span><span class="co">#&gt; #####################################################</span></span>
+<span><span class="co">#&gt; Proceeding with step 1 [flowframe_read] ...</span></span>
+<span><span class="co">#&gt; Proceeding with step 2 [remove_margins] ...</span></span>
+<span><span class="co">#&gt; Removing margins from file : Donor2.fcs</span></span>
+<span><span class="co">#&gt; Proceeding with step 3 [compensate] ...</span></span>
+<span><span class="co">#&gt; Compensating file : Donor2.fcs</span></span>
+<span><span class="co">#&gt; Proceeding with step 4 [perform_QC] ...</span></span>
+<span><span class="co">#&gt; Applying PeacoQC method...</span></span>
+<span><span class="co">#&gt; Warning in CheckInputSignalStability(ff, channels, determine_good_cells, :</span></span>
+<span><span class="co">#&gt; There is an inconsistancy in the time channel.  It seems that not all the cells</span></span>
+<span><span class="co">#&gt; are ordered according to time in the flowframe.</span></span>
+<span><span class="co">#&gt; Starting quality control analysis for Donor2.fcs</span></span>
+<span><span class="co">#&gt; Warning in FindIncreasingDecreasingChannels(breaks, ff, channels, plot, : There</span></span>
+<span><span class="co">#&gt; seems to be an increasing or decreasing trend in a channel for Donor2.fcs .</span></span>
+<span><span class="co">#&gt; Please inspect this in the overview figure.</span></span>
+<span><span class="co">#&gt; Calculating peaks</span></span>
+<span><span class="co">#&gt; Warning in PeacoQC::PeacoQC(ff = ffIn, channels = channel4QualityControl, :</span></span>
+<span><span class="co">#&gt; There are not enough bins for a robust isolation tree analysis.</span></span>
+<span><span class="co">#&gt; MAD analysis removed 1% of the measurements</span></span>
+<span><span class="co">#&gt; The algorithm removed 1% of the measurements</span></span>
+<span><span class="co">#&gt; Proceeding with step 5 [remove_doublets] ...</span></span>
+<span><span class="co">#&gt; Proceeding with step 6 [remove_debris] ...</span></span>
+<span><span class="co">#&gt; The prior specification has no effect when usePrior=no</span></span>
+<span><span class="co">#&gt; Using the serial version of flowClust</span></span>
+<span><span class="co">#&gt; Proceeding with step 7 [remove_dead_cells] ...</span></span>
+<span><span class="co">#&gt; Removing Dead Cells events (using flowDensity::deGate()) from file : Donor2.fcs</span></span></code></pre></div>
 </div>
 <div class="section level4">
 <h4 id="running-sample-files-in-parallel">Running sample files in parallel<a class="anchor" aria-label="anchor" href="#running-sample-files-in-parallel"></a>
@@ -1222,81 +1342,204 @@ used.</p>
 <div class="sourceCode" id="cb16"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" tabindex="-1"></a><span class="co"># 6b. execute pipeline in parallel</span></span>
 <span id="cb16-2"><a href="#cb16-2" tabindex="-1"></a>bp <span class="ot">&lt;-</span> BiocParallel<span class="sc">::</span><span class="fu">SnowParam</span>(<span class="at">progressbar =</span> <span class="cn">TRUE</span>)</span>
 <span id="cb16-3"><a href="#cb16-3" tabindex="-1"></a></span>
-<span id="cb16-4"><a href="#cb16-4" tabindex="-1"></a><span class="fu">execute</span>(pipL_flowAI, <span class="at">path =</span> resultsDir, <span class="at">rmCache =</span> <span class="cn">TRUE</span>, <span class="at">useBiocParallel =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb16-4"><a href="#cb16-4" tabindex="-1"></a><span class="fu">execute</span>(pipL_PQC, <span class="at">path =</span> resultsDir, <span class="at">rmCache =</span> <span class="cn">TRUE</span>, <span class="at">useBiocParallel =</span> <span class="cn">TRUE</span>,</span>
 <span id="cb16-5"><a href="#cb16-5" tabindex="-1"></a>        <span class="at">BPPARAM =</span> bp,</span>
 <span id="cb16-6"><a href="#cb16-6" tabindex="-1"></a>        <span class="at">BPOPTIONS =</span> BiocParallel<span class="sc">::</span><span class="fu">bpoptions</span>(<span class="at">package =</span> <span class="fu">c</span>(<span class="st">"flowCore"</span>, </span>
 <span id="cb16-7"><a href="#cb16-7" tabindex="-1"></a>                                                        <span class="st">"CytoPipelineUtils"</span>)))</span>
-<span id="cb16-8"><a href="#cb16-8" tabindex="-1"></a><span class="co">#&gt; Warning in execute(pipL_flowAI, path = resultsDir, rmCache = TRUE,</span></span>
-<span id="cb16-9"><a href="#cb16-9" tabindex="-1"></a><span class="co">#&gt; useBiocParallel = TRUE, : Found a previous cache with experiment name</span></span>
-<span id="cb16-10"><a href="#cb16-10" tabindex="-1"></a><span class="co">#&gt; CytoPipeline_Demo_flowAI =&gt; removed it</span></span>
+<span id="cb16-8"><a href="#cb16-8" tabindex="-1"></a><span class="co">#&gt; Warning in execute(pipL_PQC, path = resultsDir, rmCache = TRUE, useBiocParallel</span></span>
+<span id="cb16-9"><a href="#cb16-9" tabindex="-1"></a><span class="co">#&gt; = TRUE, : Found a previous cache with experiment name CytoPipeline_Demo_PQC =&gt;</span></span>
+<span id="cb16-10"><a href="#cb16-10" tabindex="-1"></a><span class="co">#&gt; removed it</span></span>
 <span id="cb16-11"><a href="#cb16-11" tabindex="-1"></a><span class="co">#&gt; #####################################################</span></span>
 <span id="cb16-12"><a href="#cb16-12" tabindex="-1"></a><span class="co">#&gt; </span><span class="al">###</span><span class="co"> running SCALE TRANSFORMATION processing steps </span><span class="al">###</span></span>
 <span id="cb16-13"><a href="#cb16-13" tabindex="-1"></a><span class="co">#&gt; #####################################################</span></span>
 <span id="cb16-14"><a href="#cb16-14" tabindex="-1"></a><span class="co">#&gt; Proceeding with step 1 [flowframe_read] ...</span></span>
 <span id="cb16-15"><a href="#cb16-15" tabindex="-1"></a><span class="co">#&gt; Proceeding with step 2 [remove_margins] ...</span></span>
-<span id="cb16-16"><a href="#cb16-16" tabindex="-1"></a><span class="co">#&gt; Removing margins from file : D91_G01.fcs</span></span>
-<span id="cb16-17"><a href="#cb16-17" tabindex="-1"></a><span class="co">#&gt; Removing margins from file : D91_A01.fcs</span></span>
+<span id="cb16-16"><a href="#cb16-16" tabindex="-1"></a><span class="co">#&gt; Removing margins from file : Donor1.fcs</span></span>
+<span id="cb16-17"><a href="#cb16-17" tabindex="-1"></a><span class="co">#&gt; Removing margins from file : Donor2.fcs</span></span>
 <span id="cb16-18"><a href="#cb16-18" tabindex="-1"></a><span class="co">#&gt; Proceeding with step 3 [compensate] ...</span></span>
-<span id="cb16-19"><a href="#cb16-19" tabindex="-1"></a><span class="co">#&gt; Compensating file : D91_G01.fcs</span></span>
-<span id="cb16-20"><a href="#cb16-20" tabindex="-1"></a><span class="co">#&gt; Compensating file : D91_A01.fcs</span></span>
+<span id="cb16-19"><a href="#cb16-19" tabindex="-1"></a><span class="co">#&gt; Compensating file : Donor1.fcs</span></span>
+<span id="cb16-20"><a href="#cb16-20" tabindex="-1"></a><span class="co">#&gt; Compensating file : Donor2.fcs</span></span>
 <span id="cb16-21"><a href="#cb16-21" tabindex="-1"></a><span class="co">#&gt; Proceeding with step 4 [flowframe_aggregate] ...</span></span>
 <span id="cb16-22"><a href="#cb16-22" tabindex="-1"></a><span class="co">#&gt; Proceeding with step 5 [scale_transform_estimate] ...</span></span>
 <span id="cb16-23"><a href="#cb16-23" tabindex="-1"></a><span class="co">#&gt; estimating logicle transformations for fluorochrome channels...</span></span>
 <span id="cb16-24"><a href="#cb16-24" tabindex="-1"></a><span class="co">#&gt; Estimating linear transformation for scatter channels : reference marker = CD4...</span></span>
 <span id="cb16-25"><a href="#cb16-25" tabindex="-1"></a><span class="co">#&gt; applying specific linear transformation for FSC-A channel...</span></span>
-<span id="cb16-26"><a href="#cb16-26" tabindex="-1"></a><span class="co">#&gt; initial quantiles : q5 = 2428.4839 ; q95 = 171164.6242</span></span>
-<span id="cb16-27"><a href="#cb16-27" tabindex="-1"></a><span class="co">#&gt; target quantiles : q5 = 0.1851 ; q95 = 1.5152</span></span>
-<span id="cb16-28"><a href="#cb16-28" tabindex="-1"></a><span class="co">#&gt; a = 7.88e-06 ; b = 1.66e-01</span></span>
+<span id="cb16-26"><a href="#cb16-26" tabindex="-1"></a><span class="co">#&gt; initial quantiles : q5 = 15825.9604 ; q95 = 182291.0469</span></span>
+<span id="cb16-27"><a href="#cb16-27" tabindex="-1"></a><span class="co">#&gt; target quantiles : q5 = 0.4556 ; q95 = 2.8719</span></span>
+<span id="cb16-28"><a href="#cb16-28" tabindex="-1"></a><span class="co">#&gt; a = 1.45e-05 ; b = 2.26e-01</span></span>
 <span id="cb16-29"><a href="#cb16-29" tabindex="-1"></a><span class="co">#&gt; applying FSC-A linear transformation for FSC-H channel...</span></span>
 <span id="cb16-30"><a href="#cb16-30" tabindex="-1"></a><span class="co">#&gt; applying specific linear transformation for SSC-A channel...</span></span>
-<span id="cb16-31"><a href="#cb16-31" tabindex="-1"></a><span class="co">#&gt; initial quantiles : q5 = 8792.7513 ; q95 = 85456.8254</span></span>
-<span id="cb16-32"><a href="#cb16-32" tabindex="-1"></a><span class="co">#&gt; target quantiles : q5 = 0.1851 ; q95 = 1.5152</span></span>
-<span id="cb16-33"><a href="#cb16-33" tabindex="-1"></a><span class="co">#&gt; a = 1.73e-05 ; b = 3.26e-02</span></span>
-<span id="cb16-34"><a href="#cb16-34" tabindex="-1"></a><span class="co">#&gt; </span></span>
-<span id="cb16-35"><a href="#cb16-35" tabindex="-1"></a>  <span class="sc">|</span>                                                                            </span>
-<span id="cb16-36"><a href="#cb16-36" tabindex="-1"></a>  <span class="er">|</span>                                                                      <span class="er">|</span>   <span class="dv">0</span>%</span>
-<span id="cb16-37"><a href="#cb16-37" tabindex="-1"></a><span class="co">#&gt; #####################################################</span></span>
-<span id="cb16-38"><a href="#cb16-38" tabindex="-1"></a><span class="co">#&gt; </span><span class="al">###</span><span class="co"> NOW PRE-PROCESSING FILE ./rawData/D91_G01.fcs...</span></span>
-<span id="cb16-39"><a href="#cb16-39" tabindex="-1"></a><span class="co">#&gt; #####################################################</span></span>
-<span id="cb16-40"><a href="#cb16-40" tabindex="-1"></a><span class="co">#&gt; Proceeding with step 1 [flowframe_read] ...</span></span>
-<span id="cb16-41"><a href="#cb16-41" tabindex="-1"></a><span class="co">#&gt; Proceeding with step 2 [remove_margins] ...</span></span>
-<span id="cb16-42"><a href="#cb16-42" tabindex="-1"></a><span class="co">#&gt; Removing margins from file : D91_G01.fcs</span></span>
-<span id="cb16-43"><a href="#cb16-43" tabindex="-1"></a><span class="co">#&gt; Proceeding with step 3 [perform_QC] ...</span></span>
-<span id="cb16-44"><a href="#cb16-44" tabindex="-1"></a><span class="co">#&gt; Applying flowAI method...</span></span>
-<span id="cb16-45"><a href="#cb16-45" tabindex="-1"></a><span class="co">#&gt; Quality control for the file: d3d019b7-c433-4b38-9cbc-c13afe66e623</span></span>
-<span id="cb16-46"><a href="#cb16-46" tabindex="-1"></a><span class="co">#&gt; 5.3% of anomalous cells detected in the flow rate check. </span></span>
-<span id="cb16-47"><a href="#cb16-47" tabindex="-1"></a><span class="co">#&gt; 0% of anomalous cells detected in signal acquisition check. </span></span>
-<span id="cb16-48"><a href="#cb16-48" tabindex="-1"></a><span class="co">#&gt; 0.71% of anomalous cells detected in the dynamic range check. </span></span>
-<span id="cb16-49"><a href="#cb16-49" tabindex="-1"></a><span class="co">#&gt; Proceeding with step 4 [remove_doublets] ...</span></span>
-<span id="cb16-50"><a href="#cb16-50" tabindex="-1"></a><span class="co">#&gt; Proceeding with step 5 [remove_debris] ...</span></span>
-<span id="cb16-51"><a href="#cb16-51" tabindex="-1"></a><span class="co">#&gt; The prior specification has no effect when usePrior=no</span></span>
-<span id="cb16-52"><a href="#cb16-52" tabindex="-1"></a><span class="co">#&gt; Using the serial version of flowClust</span></span>
-<span id="cb16-53"><a href="#cb16-53" tabindex="-1"></a><span class="co">#&gt; Proceeding with step 6 [compensate] ...</span></span>
-<span id="cb16-54"><a href="#cb16-54" tabindex="-1"></a><span class="co">#&gt; Compensating file : D91_G01.fcs</span></span>
-<span id="cb16-55"><a href="#cb16-55" tabindex="-1"></a><span class="co">#&gt; </span></span>
-<span id="cb16-56"><a href="#cb16-56" tabindex="-1"></a>  <span class="sc">|</span>                                                                            </span>
-<span id="cb16-57"><a href="#cb16-57" tabindex="-1"></a>  <span class="er">|===================================</span>                                   <span class="er">|</span>  <span class="dv">50</span>%</span>
-<span id="cb16-58"><a href="#cb16-58" tabindex="-1"></a><span class="co">#&gt; #####################################################</span></span>
-<span id="cb16-59"><a href="#cb16-59" tabindex="-1"></a><span class="co">#&gt; </span><span class="al">###</span><span class="co"> NOW PRE-PROCESSING FILE ./rawData/D91_A01.fcs...</span></span>
-<span id="cb16-60"><a href="#cb16-60" tabindex="-1"></a><span class="co">#&gt; #####################################################</span></span>
-<span id="cb16-61"><a href="#cb16-61" tabindex="-1"></a><span class="co">#&gt; Proceeding with step 1 [flowframe_read] ...</span></span>
-<span id="cb16-62"><a href="#cb16-62" tabindex="-1"></a><span class="co">#&gt; Proceeding with step 2 [remove_margins] ...</span></span>
-<span id="cb16-63"><a href="#cb16-63" tabindex="-1"></a><span class="co">#&gt; Removing margins from file : D91_A01.fcs</span></span>
-<span id="cb16-64"><a href="#cb16-64" tabindex="-1"></a><span class="co">#&gt; Proceeding with step 3 [perform_QC] ...</span></span>
-<span id="cb16-65"><a href="#cb16-65" tabindex="-1"></a><span class="co">#&gt; Applying flowAI method...</span></span>
-<span id="cb16-66"><a href="#cb16-66" tabindex="-1"></a><span class="co">#&gt; Quality control for the file: d8f7c9cd-a4ff-4726-adf5-9ebebdaccc3f</span></span>
-<span id="cb16-67"><a href="#cb16-67" tabindex="-1"></a><span class="co">#&gt; 13.23% of anomalous cells detected in the flow rate check. </span></span>
-<span id="cb16-68"><a href="#cb16-68" tabindex="-1"></a><span class="co">#&gt; 18.94% of anomalous cells detected in signal acquisition check. </span></span>
-<span id="cb16-69"><a href="#cb16-69" tabindex="-1"></a><span class="co">#&gt; 0.65% of anomalous cells detected in the dynamic range check. </span></span>
-<span id="cb16-70"><a href="#cb16-70" tabindex="-1"></a><span class="co">#&gt; Proceeding with step 4 [remove_doublets] ...</span></span>
-<span id="cb16-71"><a href="#cb16-71" tabindex="-1"></a><span class="co">#&gt; Proceeding with step 5 [remove_debris] ...</span></span>
-<span id="cb16-72"><a href="#cb16-72" tabindex="-1"></a><span class="co">#&gt; The prior specification has no effect when usePrior=no</span></span>
-<span id="cb16-73"><a href="#cb16-73" tabindex="-1"></a><span class="co">#&gt; Using the serial version of flowClust</span></span>
-<span id="cb16-74"><a href="#cb16-74" tabindex="-1"></a><span class="co">#&gt; Proceeding with step 6 [compensate] ...</span></span>
-<span id="cb16-75"><a href="#cb16-75" tabindex="-1"></a><span class="co">#&gt; Compensating file : D91_A01.fcs</span></span>
-<span id="cb16-76"><a href="#cb16-76" tabindex="-1"></a><span class="co">#&gt; </span></span>
-<span id="cb16-77"><a href="#cb16-77" tabindex="-1"></a>  <span class="sc">|</span>                                                                            </span>
-<span id="cb16-78"><a href="#cb16-78" tabindex="-1"></a>  <span class="er">|======================================================================|</span> <span class="dv">100</span>%</span></code></pre></div>
+<span id="cb16-31"><a href="#cb16-31" tabindex="-1"></a><span class="co">#&gt; initial quantiles : q5 = 23846.3145 ; q95 = 222903.9688</span></span>
+<span id="cb16-32"><a href="#cb16-32" tabindex="-1"></a><span class="co">#&gt; target quantiles : q5 = 0.4556 ; q95 = 2.8719</span></span>
+<span id="cb16-33"><a href="#cb16-33" tabindex="-1"></a><span class="co">#&gt; a = 1.21e-05 ; b = 1.66e-01</span></span>
+<span id="cb16-34"><a href="#cb16-34" tabindex="-1"></a><span class="co">#&gt; applying SSC-A linear transformation for SSC-H channel...</span></span>
+<span id="cb16-35"><a href="#cb16-35" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb16-36"><a href="#cb16-36" tabindex="-1"></a>  <span class="sc">|</span>                                                                            </span>
+<span id="cb16-37"><a href="#cb16-37" tabindex="-1"></a>  <span class="er">|</span>                                                                      <span class="er">|</span>   <span class="dv">0</span>%</span>
+<span id="cb16-38"><a href="#cb16-38" tabindex="-1"></a><span class="co">#&gt; #####################################################</span></span>
+<span id="cb16-39"><a href="#cb16-39" tabindex="-1"></a><span class="co">#&gt; </span><span class="al">###</span><span class="co"> NOW PRE-PROCESSING FILE /usr/local/lib/R/site-library/CytoPipeline/extdata/Donor1.fcs...</span></span>
+<span id="cb16-40"><a href="#cb16-40" tabindex="-1"></a><span class="co">#&gt; #####################################################</span></span>
+<span id="cb16-41"><a href="#cb16-41" tabindex="-1"></a><span class="co">#&gt; Proceeding with step 1 [flowframe_read] ...</span></span>
+<span id="cb16-42"><a href="#cb16-42" tabindex="-1"></a><span class="co">#&gt; Proceeding with step 2 [remove_margins] ...</span></span>
+<span id="cb16-43"><a href="#cb16-43" tabindex="-1"></a><span class="co">#&gt; Removing margins from file : Donor1.fcs</span></span>
+<span id="cb16-44"><a href="#cb16-44" tabindex="-1"></a><span class="co">#&gt; Proceeding with step 3 [compensate] ...</span></span>
+<span id="cb16-45"><a href="#cb16-45" tabindex="-1"></a><span class="co">#&gt; Compensating file : Donor1.fcs</span></span>
+<span id="cb16-46"><a href="#cb16-46" tabindex="-1"></a><span class="co">#&gt; Proceeding with step 4 [perform_QC] ...</span></span>
+<span id="cb16-47"><a href="#cb16-47" tabindex="-1"></a><span class="co">#&gt; Applying PeacoQC method...</span></span>
+<span id="cb16-48"><a href="#cb16-48" tabindex="-1"></a><span class="co">#&gt; Starting quality control analysis for Donor1.fcs</span></span>
+<span id="cb16-49"><a href="#cb16-49" tabindex="-1"></a><span class="co">#&gt; Calculating peaks</span></span>
+<span id="cb16-50"><a href="#cb16-50" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb16-51"><a href="#cb16-51" tabindex="-1"></a>  <span class="sc">|</span>                                                        </span>
+<span id="cb16-52"><a href="#cb16-52" tabindex="-1"></a>  <span class="er">|</span>                                                  <span class="er">|</span>   <span class="dv">0</span>%</span>
+<span id="cb16-53"><a href="#cb16-53" tabindex="-1"></a>  <span class="sc">|</span>                                                        </span>
+<span id="cb16-54"><a href="#cb16-54" tabindex="-1"></a>  <span class="er">|</span><span class="sc">++</span>                                                <span class="er">|</span>   <span class="dv">5</span>%</span>
+<span id="cb16-55"><a href="#cb16-55" tabindex="-1"></a>  <span class="sc">|</span>                                                        </span>
+<span id="cb16-56"><a href="#cb16-56" tabindex="-1"></a>  <span class="er">|</span><span class="sc">+++++</span>                                             <span class="er">|</span>  <span class="dv">10</span>%</span>
+<span id="cb16-57"><a href="#cb16-57" tabindex="-1"></a>  <span class="sc">|</span>                                                        </span>
+<span id="cb16-58"><a href="#cb16-58" tabindex="-1"></a>  <span class="er">|</span><span class="sc">++++++++</span>                                          <span class="er">|</span>  <span class="dv">15</span>%</span>
+<span id="cb16-59"><a href="#cb16-59" tabindex="-1"></a>  <span class="sc">|</span>                                                        </span>
+<span id="cb16-60"><a href="#cb16-60" tabindex="-1"></a>  <span class="er">|</span><span class="sc">++++++++++</span>                                        <span class="er">|</span>  <span class="dv">20</span>%</span>
+<span id="cb16-61"><a href="#cb16-61" tabindex="-1"></a>  <span class="sc">|</span>                                                        </span>
+<span id="cb16-62"><a href="#cb16-62" tabindex="-1"></a>  <span class="er">|</span><span class="sc">++++++++++++</span>                                      <span class="er">|</span>  <span class="dv">25</span>%</span>
+<span id="cb16-63"><a href="#cb16-63" tabindex="-1"></a>  <span class="sc">|</span>                                                        </span>
+<span id="cb16-64"><a href="#cb16-64" tabindex="-1"></a>  <span class="er">|</span><span class="sc">+++++++++++++++</span>                                   <span class="er">|</span>  <span class="dv">30</span>%</span>
+<span id="cb16-65"><a href="#cb16-65" tabindex="-1"></a>  <span class="sc">|</span>                                                        </span>
+<span id="cb16-66"><a href="#cb16-66" tabindex="-1"></a>  <span class="er">|</span><span class="sc">++++++++++++++++++</span>                                <span class="er">|</span>  <span class="dv">35</span>%</span>
+<span id="cb16-67"><a href="#cb16-67" tabindex="-1"></a>  <span class="sc">|</span>                                                        </span>
+<span id="cb16-68"><a href="#cb16-68" tabindex="-1"></a>  <span class="er">|</span><span class="sc">++++++++++++++++++++</span>                              <span class="er">|</span>  <span class="dv">40</span>%</span>
+<span id="cb16-69"><a href="#cb16-69" tabindex="-1"></a>  <span class="sc">|</span>                                                        </span>
+<span id="cb16-70"><a href="#cb16-70" tabindex="-1"></a>  <span class="er">|</span><span class="sc">++++++++++++++++++++++</span>                            <span class="er">|</span>  <span class="dv">45</span>%</span>
+<span id="cb16-71"><a href="#cb16-71" tabindex="-1"></a>  <span class="sc">|</span>                                                        </span>
+<span id="cb16-72"><a href="#cb16-72" tabindex="-1"></a>  <span class="er">|</span><span class="sc">+++++++++++++++++++++++++</span>                         <span class="er">|</span>  <span class="dv">50</span>%</span>
+<span id="cb16-73"><a href="#cb16-73" tabindex="-1"></a>  <span class="sc">|</span>                                                        </span>
+<span id="cb16-74"><a href="#cb16-74" tabindex="-1"></a>  <span class="er">|</span><span class="sc">++++++++++++++++++++++++++++</span>                      <span class="er">|</span>  <span class="dv">55</span>%</span>
+<span id="cb16-75"><a href="#cb16-75" tabindex="-1"></a>  <span class="sc">|</span>                                                        </span>
+<span id="cb16-76"><a href="#cb16-76" tabindex="-1"></a>  <span class="er">|</span><span class="sc">++++++++++++++++++++++++++++++</span>                    <span class="er">|</span>  <span class="dv">60</span>%</span>
+<span id="cb16-77"><a href="#cb16-77" tabindex="-1"></a>  <span class="sc">|</span>                                                        </span>
+<span id="cb16-78"><a href="#cb16-78" tabindex="-1"></a>  <span class="er">|</span><span class="sc">++++++++++++++++++++++++++++++++</span>                  <span class="er">|</span>  <span class="dv">65</span>%</span>
+<span id="cb16-79"><a href="#cb16-79" tabindex="-1"></a>  <span class="sc">|</span>                                                        </span>
+<span id="cb16-80"><a href="#cb16-80" tabindex="-1"></a>  <span class="er">|</span><span class="sc">+++++++++++++++++++++++++++++++++++</span>               <span class="er">|</span>  <span class="dv">70</span>%</span>
+<span id="cb16-81"><a href="#cb16-81" tabindex="-1"></a>  <span class="sc">|</span>                                                        </span>
+<span id="cb16-82"><a href="#cb16-82" tabindex="-1"></a>  <span class="er">|</span><span class="sc">++++++++++++++++++++++++++++++++++++++</span>            <span class="er">|</span>  <span class="dv">75</span>%</span>
+<span id="cb16-83"><a href="#cb16-83" tabindex="-1"></a>  <span class="sc">|</span>                                                        </span>
+<span id="cb16-84"><a href="#cb16-84" tabindex="-1"></a>  <span class="er">|</span><span class="sc">++++++++++++++++++++++++++++++++++++++++</span>          <span class="er">|</span>  <span class="dv">80</span>%</span>
+<span id="cb16-85"><a href="#cb16-85" tabindex="-1"></a>  <span class="sc">|</span>                                                        </span>
+<span id="cb16-86"><a href="#cb16-86" tabindex="-1"></a>  <span class="er">|</span><span class="sc">++++++++++++++++++++++++++++++++++++++++++</span>        <span class="er">|</span>  <span class="dv">85</span>%</span>
+<span id="cb16-87"><a href="#cb16-87" tabindex="-1"></a>  <span class="sc">|</span>                                                        </span>
+<span id="cb16-88"><a href="#cb16-88" tabindex="-1"></a>  <span class="er">|</span><span class="sc">+++++++++++++++++++++++++++++++++++++++++++++</span>     <span class="er">|</span>  <span class="dv">90</span>%</span>
+<span id="cb16-89"><a href="#cb16-89" tabindex="-1"></a>  <span class="sc">|</span>                                                        </span>
+<span id="cb16-90"><a href="#cb16-90" tabindex="-1"></a>  <span class="er">|</span><span class="sc">++++++++++++++++++++++++++++++++++++++++++++++++</span>  <span class="er">|</span>  <span class="dv">95</span>%</span>
+<span id="cb16-91"><a href="#cb16-91" tabindex="-1"></a>  <span class="sc">|</span>                                                        </span>
+<span id="cb16-92"><a href="#cb16-92" tabindex="-1"></a>  <span class="er">|</span><span class="sc">++++++++++++++++++++++++++++++++++++++++++++++++++</span><span class="er">|</span> <span class="dv">100</span>%</span>
+<span id="cb16-93"><a href="#cb16-93" tabindex="-1"></a><span class="co">#&gt; MAD analysis removed 5.32% of the measurements</span></span>
+<span id="cb16-94"><a href="#cb16-94" tabindex="-1"></a><span class="co">#&gt; The algorithm removed 5.32% of the measurements</span></span>
+<span id="cb16-95"><a href="#cb16-95" tabindex="-1"></a><span class="co">#&gt; Proceeding with step 5 [remove_doublets] ...</span></span>
+<span id="cb16-96"><a href="#cb16-96" tabindex="-1"></a><span class="co">#&gt; Proceeding with step 6 [remove_debris] ...</span></span>
+<span id="cb16-97"><a href="#cb16-97" tabindex="-1"></a><span class="co">#&gt; The prior specification has no effect when usePrior=no</span></span>
+<span id="cb16-98"><a href="#cb16-98" tabindex="-1"></a><span class="co">#&gt; Using the serial version of flowClust</span></span>
+<span id="cb16-99"><a href="#cb16-99" tabindex="-1"></a><span class="co">#&gt; Proceeding with step 7 [remove_dead_cells] ...</span></span>
+<span id="cb16-100"><a href="#cb16-100" tabindex="-1"></a><span class="co">#&gt; Removing Dead Cells events (using flowDensity::deGate()) from file : Donor1.fcs</span></span>
+<span id="cb16-101"><a href="#cb16-101" tabindex="-1"></a><span class="co">#&gt; The legacy packages maptools, rgdal, and rgeos, underpinning the sp package,</span></span>
+<span id="cb16-102"><a href="#cb16-102" tabindex="-1"></a><span class="co">#&gt; which was just loaded, will retire in October 2023.</span></span>
+<span id="cb16-103"><a href="#cb16-103" tabindex="-1"></a><span class="co">#&gt; Please refer to R-spatial evolution reports for details, especially</span></span>
+<span id="cb16-104"><a href="#cb16-104" tabindex="-1"></a><span class="co">#&gt; https://r-spatial.org/r/2023/05/15/evolution4.html.</span></span>
+<span id="cb16-105"><a href="#cb16-105" tabindex="-1"></a><span class="co">#&gt; It may be desirable to make the sf package available;</span></span>
+<span id="cb16-106"><a href="#cb16-106" tabindex="-1"></a><span class="co">#&gt; package maintainers should consider adding sf to Suggests:.</span></span>
+<span id="cb16-107"><a href="#cb16-107" tabindex="-1"></a><span class="co">#&gt; The sp package is now running under evolution status 2</span></span>
+<span id="cb16-108"><a href="#cb16-108" tabindex="-1"></a><span class="co">#&gt;      (status 2 uses the sf package in place of rgdal)</span></span>
+<span id="cb16-109"><a href="#cb16-109" tabindex="-1"></a><span class="co">#&gt; rgeos version: 0.6-4, (SVN revision 699)</span></span>
+<span id="cb16-110"><a href="#cb16-110" tabindex="-1"></a><span class="co">#&gt;  GEOS runtime version: 3.10.2-CAPI-1.16.0 </span></span>
+<span id="cb16-111"><a href="#cb16-111" tabindex="-1"></a><span class="co">#&gt;  Please note that rgeos will be retired during October 2023,</span></span>
+<span id="cb16-112"><a href="#cb16-112" tabindex="-1"></a><span class="co">#&gt; plan transition to sf or terra functions using GEOS at your earliest convenience.</span></span>
+<span id="cb16-113"><a href="#cb16-113" tabindex="-1"></a><span class="co">#&gt; See https://r-spatial.org/r/2023/05/15/evolution4.html for details.</span></span>
+<span id="cb16-114"><a href="#cb16-114" tabindex="-1"></a><span class="co">#&gt;  GEOS using OverlayNG</span></span>
+<span id="cb16-115"><a href="#cb16-115" tabindex="-1"></a><span class="co">#&gt;  Linking to sp version: 2.0-0 </span></span>
+<span id="cb16-116"><a href="#cb16-116" tabindex="-1"></a><span class="co">#&gt;  Polygon checking: TRUE</span></span>
+<span id="cb16-117"><a href="#cb16-117" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb16-118"><a href="#cb16-118" tabindex="-1"></a>  <span class="sc">|</span>                                                                            </span>
+<span id="cb16-119"><a href="#cb16-119" tabindex="-1"></a>  <span class="er">|===================================</span>                                   <span class="er">|</span>  <span class="dv">50</span>%</span>
+<span id="cb16-120"><a href="#cb16-120" tabindex="-1"></a><span class="co">#&gt; #####################################################</span></span>
+<span id="cb16-121"><a href="#cb16-121" tabindex="-1"></a><span class="co">#&gt; </span><span class="al">###</span><span class="co"> NOW PRE-PROCESSING FILE /usr/local/lib/R/site-library/CytoPipeline/extdata/Donor2.fcs...</span></span>
+<span id="cb16-122"><a href="#cb16-122" tabindex="-1"></a><span class="co">#&gt; #####################################################</span></span>
+<span id="cb16-123"><a href="#cb16-123" tabindex="-1"></a><span class="co">#&gt; Proceeding with step 1 [flowframe_read] ...</span></span>
+<span id="cb16-124"><a href="#cb16-124" tabindex="-1"></a><span class="co">#&gt; Proceeding with step 2 [remove_margins] ...</span></span>
+<span id="cb16-125"><a href="#cb16-125" tabindex="-1"></a><span class="co">#&gt; Removing margins from file : Donor2.fcs</span></span>
+<span id="cb16-126"><a href="#cb16-126" tabindex="-1"></a><span class="co">#&gt; Proceeding with step 3 [compensate] ...</span></span>
+<span id="cb16-127"><a href="#cb16-127" tabindex="-1"></a><span class="co">#&gt; Compensating file : Donor2.fcs</span></span>
+<span id="cb16-128"><a href="#cb16-128" tabindex="-1"></a><span class="co">#&gt; Proceeding with step 4 [perform_QC] ...</span></span>
+<span id="cb16-129"><a href="#cb16-129" tabindex="-1"></a><span class="co">#&gt; Applying PeacoQC method...</span></span>
+<span id="cb16-130"><a href="#cb16-130" tabindex="-1"></a><span class="co">#&gt; Starting quality control analysis for Donor2.fcs</span></span>
+<span id="cb16-131"><a href="#cb16-131" tabindex="-1"></a><span class="co">#&gt; Calculating peaks</span></span>
+<span id="cb16-132"><a href="#cb16-132" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb16-133"><a href="#cb16-133" tabindex="-1"></a>  <span class="sc">|</span>                                                        </span>
+<span id="cb16-134"><a href="#cb16-134" tabindex="-1"></a>  <span class="er">|</span>                                                  <span class="er">|</span>   <span class="dv">0</span>%</span>
+<span id="cb16-135"><a href="#cb16-135" tabindex="-1"></a>  <span class="sc">|</span>                                                        </span>
+<span id="cb16-136"><a href="#cb16-136" tabindex="-1"></a>  <span class="er">|</span><span class="sc">++</span>                                                <span class="er">|</span>   <span class="dv">5</span>%</span>
+<span id="cb16-137"><a href="#cb16-137" tabindex="-1"></a>  <span class="sc">|</span>                                                        </span>
+<span id="cb16-138"><a href="#cb16-138" tabindex="-1"></a>  <span class="er">|</span><span class="sc">+++++</span>                                             <span class="er">|</span>  <span class="dv">10</span>%</span>
+<span id="cb16-139"><a href="#cb16-139" tabindex="-1"></a>  <span class="sc">|</span>                                                        </span>
+<span id="cb16-140"><a href="#cb16-140" tabindex="-1"></a>  <span class="er">|</span><span class="sc">++++++++</span>                                          <span class="er">|</span>  <span class="dv">15</span>%</span>
+<span id="cb16-141"><a href="#cb16-141" tabindex="-1"></a>  <span class="sc">|</span>                                                        </span>
+<span id="cb16-142"><a href="#cb16-142" tabindex="-1"></a>  <span class="er">|</span><span class="sc">++++++++++</span>                                        <span class="er">|</span>  <span class="dv">20</span>%</span>
+<span id="cb16-143"><a href="#cb16-143" tabindex="-1"></a>  <span class="sc">|</span>                                                        </span>
+<span id="cb16-144"><a href="#cb16-144" tabindex="-1"></a>  <span class="er">|</span><span class="sc">++++++++++++</span>                                      <span class="er">|</span>  <span class="dv">25</span>%</span>
+<span id="cb16-145"><a href="#cb16-145" tabindex="-1"></a>  <span class="sc">|</span>                                                        </span>
+<span id="cb16-146"><a href="#cb16-146" tabindex="-1"></a>  <span class="er">|</span><span class="sc">+++++++++++++++</span>                                   <span class="er">|</span>  <span class="dv">30</span>%</span>
+<span id="cb16-147"><a href="#cb16-147" tabindex="-1"></a>  <span class="sc">|</span>                                                        </span>
+<span id="cb16-148"><a href="#cb16-148" tabindex="-1"></a>  <span class="er">|</span><span class="sc">++++++++++++++++++</span>                                <span class="er">|</span>  <span class="dv">35</span>%</span>
+<span id="cb16-149"><a href="#cb16-149" tabindex="-1"></a>  <span class="sc">|</span>                                                        </span>
+<span id="cb16-150"><a href="#cb16-150" tabindex="-1"></a>  <span class="er">|</span><span class="sc">++++++++++++++++++++</span>                              <span class="er">|</span>  <span class="dv">40</span>%</span>
+<span id="cb16-151"><a href="#cb16-151" tabindex="-1"></a>  <span class="sc">|</span>                                                        </span>
+<span id="cb16-152"><a href="#cb16-152" tabindex="-1"></a>  <span class="er">|</span><span class="sc">++++++++++++++++++++++</span>                            <span class="er">|</span>  <span class="dv">45</span>%</span>
+<span id="cb16-153"><a href="#cb16-153" tabindex="-1"></a>  <span class="sc">|</span>                                                        </span>
+<span id="cb16-154"><a href="#cb16-154" tabindex="-1"></a>  <span class="er">|</span><span class="sc">+++++++++++++++++++++++++</span>                         <span class="er">|</span>  <span class="dv">50</span>%</span>
+<span id="cb16-155"><a href="#cb16-155" tabindex="-1"></a>  <span class="sc">|</span>                                                        </span>
+<span id="cb16-156"><a href="#cb16-156" tabindex="-1"></a>  <span class="er">|</span><span class="sc">++++++++++++++++++++++++++++</span>                      <span class="er">|</span>  <span class="dv">55</span>%</span>
+<span id="cb16-157"><a href="#cb16-157" tabindex="-1"></a>  <span class="sc">|</span>                                                        </span>
+<span id="cb16-158"><a href="#cb16-158" tabindex="-1"></a>  <span class="er">|</span><span class="sc">++++++++++++++++++++++++++++++</span>                    <span class="er">|</span>  <span class="dv">60</span>%</span>
+<span id="cb16-159"><a href="#cb16-159" tabindex="-1"></a>  <span class="sc">|</span>                                                        </span>
+<span id="cb16-160"><a href="#cb16-160" tabindex="-1"></a>  <span class="er">|</span><span class="sc">++++++++++++++++++++++++++++++++</span>                  <span class="er">|</span>  <span class="dv">65</span>%</span>
+<span id="cb16-161"><a href="#cb16-161" tabindex="-1"></a>  <span class="sc">|</span>                                                        </span>
+<span id="cb16-162"><a href="#cb16-162" tabindex="-1"></a>  <span class="er">|</span><span class="sc">+++++++++++++++++++++++++++++++++++</span>               <span class="er">|</span>  <span class="dv">70</span>%</span>
+<span id="cb16-163"><a href="#cb16-163" tabindex="-1"></a>  <span class="sc">|</span>                                                        </span>
+<span id="cb16-164"><a href="#cb16-164" tabindex="-1"></a>  <span class="er">|</span><span class="sc">++++++++++++++++++++++++++++++++++++++</span>            <span class="er">|</span>  <span class="dv">75</span>%</span>
+<span id="cb16-165"><a href="#cb16-165" tabindex="-1"></a>  <span class="sc">|</span>                                                        </span>
+<span id="cb16-166"><a href="#cb16-166" tabindex="-1"></a>  <span class="er">|</span><span class="sc">++++++++++++++++++++++++++++++++++++++++</span>          <span class="er">|</span>  <span class="dv">80</span>%</span>
+<span id="cb16-167"><a href="#cb16-167" tabindex="-1"></a>  <span class="sc">|</span>                                                        </span>
+<span id="cb16-168"><a href="#cb16-168" tabindex="-1"></a>  <span class="er">|</span><span class="sc">++++++++++++++++++++++++++++++++++++++++++</span>        <span class="er">|</span>  <span class="dv">85</span>%</span>
+<span id="cb16-169"><a href="#cb16-169" tabindex="-1"></a>  <span class="sc">|</span>                                                        </span>
+<span id="cb16-170"><a href="#cb16-170" tabindex="-1"></a>  <span class="er">|</span><span class="sc">+++++++++++++++++++++++++++++++++++++++++++++</span>     <span class="er">|</span>  <span class="dv">90</span>%</span>
+<span id="cb16-171"><a href="#cb16-171" tabindex="-1"></a>  <span class="sc">|</span>                                                        </span>
+<span id="cb16-172"><a href="#cb16-172" tabindex="-1"></a>  <span class="er">|</span><span class="sc">++++++++++++++++++++++++++++++++++++++++++++++++</span>  <span class="er">|</span>  <span class="dv">95</span>%</span>
+<span id="cb16-173"><a href="#cb16-173" tabindex="-1"></a>  <span class="sc">|</span>                                                        </span>
+<span id="cb16-174"><a href="#cb16-174" tabindex="-1"></a>  <span class="er">|</span><span class="sc">++++++++++++++++++++++++++++++++++++++++++++++++++</span><span class="er">|</span> <span class="dv">100</span>%</span>
+<span id="cb16-175"><a href="#cb16-175" tabindex="-1"></a><span class="co">#&gt; MAD analysis removed 1% of the measurements</span></span>
+<span id="cb16-176"><a href="#cb16-176" tabindex="-1"></a><span class="co">#&gt; The algorithm removed 1% of the measurements</span></span>
+<span id="cb16-177"><a href="#cb16-177" tabindex="-1"></a><span class="co">#&gt; Proceeding with step 5 [remove_doublets] ...</span></span>
+<span id="cb16-178"><a href="#cb16-178" tabindex="-1"></a><span class="co">#&gt; Proceeding with step 6 [remove_debris] ...</span></span>
+<span id="cb16-179"><a href="#cb16-179" tabindex="-1"></a><span class="co">#&gt; The prior specification has no effect when usePrior=no</span></span>
+<span id="cb16-180"><a href="#cb16-180" tabindex="-1"></a><span class="co">#&gt; Using the serial version of flowClust</span></span>
+<span id="cb16-181"><a href="#cb16-181" tabindex="-1"></a><span class="co">#&gt; Proceeding with step 7 [remove_dead_cells] ...</span></span>
+<span id="cb16-182"><a href="#cb16-182" tabindex="-1"></a><span class="co">#&gt; Removing Dead Cells events (using flowDensity::deGate()) from file : Donor2.fcs</span></span>
+<span id="cb16-183"><a href="#cb16-183" tabindex="-1"></a><span class="co">#&gt; The legacy packages maptools, rgdal, and rgeos, underpinning the sp package,</span></span>
+<span id="cb16-184"><a href="#cb16-184" tabindex="-1"></a><span class="co">#&gt; which was just loaded, will retire in October 2023.</span></span>
+<span id="cb16-185"><a href="#cb16-185" tabindex="-1"></a><span class="co">#&gt; Please refer to R-spatial evolution reports for details, especially</span></span>
+<span id="cb16-186"><a href="#cb16-186" tabindex="-1"></a><span class="co">#&gt; https://r-spatial.org/r/2023/05/15/evolution4.html.</span></span>
+<span id="cb16-187"><a href="#cb16-187" tabindex="-1"></a><span class="co">#&gt; It may be desirable to make the sf package available;</span></span>
+<span id="cb16-188"><a href="#cb16-188" tabindex="-1"></a><span class="co">#&gt; package maintainers should consider adding sf to Suggests:.</span></span>
+<span id="cb16-189"><a href="#cb16-189" tabindex="-1"></a><span class="co">#&gt; The sp package is now running under evolution status 2</span></span>
+<span id="cb16-190"><a href="#cb16-190" tabindex="-1"></a><span class="co">#&gt;      (status 2 uses the sf package in place of rgdal)</span></span>
+<span id="cb16-191"><a href="#cb16-191" tabindex="-1"></a><span class="co">#&gt; rgeos version: 0.6-4, (SVN revision 699)</span></span>
+<span id="cb16-192"><a href="#cb16-192" tabindex="-1"></a><span class="co">#&gt;  GEOS runtime version: 3.10.2-CAPI-1.16.0 </span></span>
+<span id="cb16-193"><a href="#cb16-193" tabindex="-1"></a><span class="co">#&gt;  Please note that rgeos will be retired during October 2023,</span></span>
+<span id="cb16-194"><a href="#cb16-194" tabindex="-1"></a><span class="co">#&gt; plan transition to sf or terra functions using GEOS at your earliest convenience.</span></span>
+<span id="cb16-195"><a href="#cb16-195" tabindex="-1"></a><span class="co">#&gt; See https://r-spatial.org/r/2023/05/15/evolution4.html for details.</span></span>
+<span id="cb16-196"><a href="#cb16-196" tabindex="-1"></a><span class="co">#&gt;  GEOS using OverlayNG</span></span>
+<span id="cb16-197"><a href="#cb16-197" tabindex="-1"></a><span class="co">#&gt;  Linking to sp version: 2.0-0 </span></span>
+<span id="cb16-198"><a href="#cb16-198" tabindex="-1"></a><span class="co">#&gt;  Polygon checking: TRUE</span></span>
+<span id="cb16-199"><a href="#cb16-199" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb16-200"><a href="#cb16-200" tabindex="-1"></a>  <span class="sc">|</span>                                                                            </span>
+<span id="cb16-201"><a href="#cb16-201" tabindex="-1"></a>  <span class="er">|======================================================================|</span> <span class="dv">100</span>%</span></code></pre></div>
 </div>
 </div>
 </div>
@@ -1330,45 +1573,57 @@ used.</p>
 <span><span class="co">#&gt; [4] CytoPipeline_1.1.2      </span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; loaded via a namespace (and not attached):</span></span>
-<span><span class="co">#&gt;   [1] DBI_1.1.3             gridExtra_2.3         rlang_1.1.1          </span></span>
-<span><span class="co">#&gt;   [4] magrittr_2.0.3        clue_0.3-64           GetoptLong_1.0.5     </span></span>
-<span><span class="co">#&gt;   [7] matrixStats_1.0.0     compiler_4.3.1        RSQLite_2.3.1        </span></span>
-<span><span class="co">#&gt;  [10] reshape2_1.4.4        png_0.1-8             systemfonts_1.0.4    </span></span>
-<span><span class="co">#&gt;  [13] vctrs_0.6.3           stringr_1.5.0         pkgconfig_2.0.3      </span></span>
-<span><span class="co">#&gt;  [16] shape_1.4.6           crayon_1.5.2          fastmap_1.1.1        </span></span>
-<span><span class="co">#&gt;  [19] dbplyr_2.3.3          ellipsis_0.3.2        labeling_0.4.2       </span></span>
-<span><span class="co">#&gt;  [22] utf8_1.2.3            promises_1.2.1        ncdfFlow_2.47.0      </span></span>
-<span><span class="co">#&gt;  [25] rmarkdown_2.24        graph_1.79.0          ragg_1.2.5           </span></span>
-<span><span class="co">#&gt;  [28] purrr_1.0.2           bit_4.0.5             xfun_0.40            </span></span>
-<span><span class="co">#&gt;  [31] zlibbioc_1.47.0       cachem_1.0.8          jsonlite_1.8.7       </span></span>
-<span><span class="co">#&gt;  [34] flowWorkspace_4.13.2  blob_1.2.4            highr_0.10           </span></span>
-<span><span class="co">#&gt;  [37] later_1.3.1           BiocParallel_1.35.4   cluster_2.1.4        </span></span>
-<span><span class="co">#&gt;  [40] parallel_4.3.1        R6_2.5.1              bslib_0.5.1          </span></span>
-<span><span class="co">#&gt;  [43] stringi_1.7.12        RColorBrewer_1.1-3    jquerylib_0.1.4      </span></span>
-<span><span class="co">#&gt;  [46] Rcpp_1.0.11           iterators_1.0.14      knitr_1.43           </span></span>
-<span><span class="co">#&gt;  [49] snow_0.4-4            zoo_1.8-12            IRanges_2.35.2       </span></span>
-<span><span class="co">#&gt;  [52] flowCore_2.13.1       httpuv_1.6.11         tidyselect_1.2.0     </span></span>
-<span><span class="co">#&gt;  [55] yaml_2.3.7            doParallel_1.0.17     codetools_0.2-19     </span></span>
-<span><span class="co">#&gt;  [58] curl_5.0.2            lattice_0.21-8        tibble_3.2.1         </span></span>
-<span><span class="co">#&gt;  [61] plyr_1.8.8            Biobase_2.61.0        shiny_1.7.5          </span></span>
-<span><span class="co">#&gt;  [64] withr_2.5.0           evaluate_0.21         desc_1.4.2           </span></span>
-<span><span class="co">#&gt;  [67] BiocFileCache_2.9.1   circlize_0.4.15       pillar_1.9.0         </span></span>
-<span><span class="co">#&gt;  [70] filelock_1.0.2        flowAI_1.31.0         foreach_1.5.2        </span></span>
-<span><span class="co">#&gt;  [73] stats4_4.3.1          generics_0.1.3        rprojroot_2.0.3      </span></span>
-<span><span class="co">#&gt;  [76] diagram_1.6.5         S4Vectors_0.39.1      ggplot2_3.4.3        </span></span>
-<span><span class="co">#&gt;  [79] munsell_0.5.0         ggcyto_1.29.1         scales_1.2.1         </span></span>
-<span><span class="co">#&gt;  [82] xtable_1.8-4          PeacoQC_1.11.2        changepoint_2.2.4    </span></span>
-<span><span class="co">#&gt;  [85] glue_1.6.2            tools_4.3.1           hexbin_1.28.3        </span></span>
-<span><span class="co">#&gt;  [88] data.table_1.14.8     fs_1.6.3              XML_3.99-0.14        </span></span>
-<span><span class="co">#&gt;  [91] grid_4.3.1            flowClust_3.39.0      RProtoBufLib_2.13.1  </span></span>
-<span><span class="co">#&gt;  [94] colorspace_2.1-0      cli_3.6.1             textshaping_0.3.6    </span></span>
-<span><span class="co">#&gt;  [97] fansi_1.0.4           cytolib_2.13.1        ComplexHeatmap_2.17.0</span></span>
-<span><span class="co">#&gt; [100] dplyr_1.1.2           Rgraphviz_2.45.0      gtable_0.3.4         </span></span>
-<span><span class="co">#&gt; [103] sass_0.4.7            digest_0.6.33         BiocGenerics_0.47.0  </span></span>
-<span><span class="co">#&gt; [106] farver_2.1.1          rjson_0.2.21          memoise_2.0.1        </span></span>
-<span><span class="co">#&gt; [109] htmltools_0.5.6       pkgdown_2.0.7         lifecycle_1.0.3      </span></span>
-<span><span class="co">#&gt; [112] httr_1.4.7            GlobalOptions_0.1.2   mime_0.12            </span></span>
-<span><span class="co">#&gt; [115] bit64_4.0.5</span></span></code></pre>
+<span><span class="co">#&gt;   [1] RColorBrewer_1.1-3    jsonlite_1.8.7        shape_1.4.6          </span></span>
+<span><span class="co">#&gt;   [4] magrittr_2.0.3        farver_2.1.1          rmarkdown_2.24       </span></span>
+<span><span class="co">#&gt;   [7] GlobalOptions_0.1.2   fs_1.6.3              fields_15.2          </span></span>
+<span><span class="co">#&gt;  [10] zlibbioc_1.47.0       ragg_1.2.5            vctrs_0.6.3          </span></span>
+<span><span class="co">#&gt;  [13] memoise_2.0.1         RPMG_2.2-7            htmltools_0.5.6      </span></span>
+<span><span class="co">#&gt;  [16] curl_5.0.2            sass_0.4.7            flowDensity_1.35.0   </span></span>
+<span><span class="co">#&gt;  [19] KernSmooth_2.23-22    bslib_0.5.1           desc_1.4.2           </span></span>
+<span><span class="co">#&gt;  [22] plyr_1.8.8            zoo_1.8-12            cachem_1.0.8         </span></span>
+<span><span class="co">#&gt;  [25] changepoint_2.2.4     RFOC_3.4-6            mime_0.12            </span></span>
+<span><span class="co">#&gt;  [28] lifecycle_1.0.3       iterators_1.0.14      pkgconfig_2.0.3      </span></span>
+<span><span class="co">#&gt;  [31] R6_2.5.1              fastmap_1.1.1         shiny_1.7.5          </span></span>
+<span><span class="co">#&gt;  [34] clue_0.3-64           digest_0.6.33         colorspace_2.1-0     </span></span>
+<span><span class="co">#&gt;  [37] S4Vectors_0.39.1      rprojroot_2.0.3       textshaping_0.3.6    </span></span>
+<span><span class="co">#&gt;  [40] RSQLite_2.3.1         labeling_0.4.2        filelock_1.0.2       </span></span>
+<span><span class="co">#&gt;  [43] cytolib_2.13.1        fansi_1.0.4           httr_1.4.7           </span></span>
+<span><span class="co">#&gt;  [46] abind_1.4-5           compiler_4.3.1        splancs_2.01-44      </span></span>
+<span><span class="co">#&gt;  [49] proxy_0.4-27          bit64_4.0.5           withr_2.5.0          </span></span>
+<span><span class="co">#&gt;  [52] doParallel_1.0.17     BiocParallel_1.35.4   carData_3.0-5        </span></span>
+<span><span class="co">#&gt;  [55] DBI_1.1.3             RSEIS_4.1-6           flowClust_3.39.0     </span></span>
+<span><span class="co">#&gt;  [58] hexbin_1.28.3         highr_0.10            gplots_3.1.3         </span></span>
+<span><span class="co">#&gt;  [61] maps_3.4.1            MASS_7.3-60           GEOmap_2.5-2         </span></span>
+<span><span class="co">#&gt;  [64] classInt_0.4-9        rjson_0.2.21          gtools_3.9.4         </span></span>
+<span><span class="co">#&gt;  [67] caTools_1.18.2        units_0.8-3           tools_4.3.1          </span></span>
+<span><span class="co">#&gt;  [70] httpuv_1.6.11         flowAI_1.31.0         IDPmisc_1.1.20       </span></span>
+<span><span class="co">#&gt;  [73] MBA_0.1-0             glue_1.6.2            promises_1.2.1       </span></span>
+<span><span class="co">#&gt;  [76] sf_1.0-14             grid_4.3.1            cluster_2.1.4        </span></span>
+<span><span class="co">#&gt;  [79] reshape2_1.4.4        snow_0.4-4            generics_0.1.3       </span></span>
+<span><span class="co">#&gt;  [82] gtable_0.3.4          class_7.3-22          data.table_1.14.8    </span></span>
+<span><span class="co">#&gt;  [85] sp_2.0-0              car_3.1-2             utf8_1.2.3           </span></span>
+<span><span class="co">#&gt;  [88] BiocGenerics_0.47.0   foreach_1.5.2         pillar_1.9.0         </span></span>
+<span><span class="co">#&gt;  [91] stringr_1.5.0         spam_2.9-1            later_1.3.1          </span></span>
+<span><span class="co">#&gt;  [94] circlize_0.4.15       flowCore_2.13.1       dplyr_1.1.2          </span></span>
+<span><span class="co">#&gt;  [97] PeacoQC_1.11.2        BiocFileCache_2.9.1   lattice_0.21-8       </span></span>
+<span><span class="co">#&gt; [100] deldir_1.0-9          bit_4.0.5             RProtoBufLib_2.13.1  </span></span>
+<span><span class="co">#&gt; [103] tidyselect_1.2.0      ComplexHeatmap_2.17.0 ggcyto_1.29.1        </span></span>
+<span><span class="co">#&gt; [106] knitr_1.43            gridExtra_2.3         IRanges_2.35.2       </span></span>
+<span><span class="co">#&gt; [109] flowWorkspace_4.13.2  stats4_4.3.1          xfun_0.40            </span></span>
+<span><span class="co">#&gt; [112] Biobase_2.61.0        matrixStats_1.0.0     stringi_1.7.12       </span></span>
+<span><span class="co">#&gt; [115] ncdfFlow_2.47.0       yaml_2.3.7            Rwave_2.6-5          </span></span>
+<span><span class="co">#&gt; [118] evaluate_0.21         codetools_0.2-19      interp_1.1-4         </span></span>
+<span><span class="co">#&gt; [121] tibble_3.2.1          Rgraphviz_2.45.0      graph_1.79.0         </span></span>
+<span><span class="co">#&gt; [124] cli_3.6.1             flowViz_1.65.0        xtable_1.8-4         </span></span>
+<span><span class="co">#&gt; [127] systemfonts_1.0.4     munsell_0.5.0         jquerylib_0.1.4      </span></span>
+<span><span class="co">#&gt; [130] Rcpp_1.0.11           dbplyr_2.3.3          png_0.1-8            </span></span>
+<span><span class="co">#&gt; [133] XML_3.99-0.14         parallel_4.3.1        ellipsis_0.3.2       </span></span>
+<span><span class="co">#&gt; [136] pkgdown_2.0.7         ggplot2_3.4.3         blob_1.2.4           </span></span>
+<span><span class="co">#&gt; [139] dotCall64_1.0-2       jpeg_0.1-10           latticeExtra_0.6-30  </span></span>
+<span><span class="co">#&gt; [142] diagram_1.6.5         bitops_1.0-7          viridisLite_0.4.2    </span></span>
+<span><span class="co">#&gt; [145] e1071_1.7-13          scales_1.2.1          purrr_1.0.2          </span></span>
+<span><span class="co">#&gt; [148] crayon_1.5.2          GetoptLong_1.0.5      rlang_1.1.1          </span></span>
+<span><span class="co">#&gt; [151] rgeos_0.6-4</span></span></code></pre>
 </div>
 <div class="section level2">
 <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a>
@@ -1379,6 +1634,11 @@ Isterdael, Sofie Van Gassen, and Yvan Saeys. 2021. “PeacoQC: Peak-Based
 Selection of High Quality Cytometry Data.” Cytometry. Part A: The
 Journal of the International Society for Analytical Cytology, September.
 <a href="https://doi.org/10.1002/cyto.a.24501" class="external-link uri">https://doi.org/10.1002/cyto.a.24501</a>.</p>
+<p>Gherardin, Nicholas A., David S. Ritchie, Dale I. Godfrey, and Paul
+J. Neeson. 2014. “OMIP-021: Simultaneous Quantification of Human
+Conventional and Innate-like T-Cell Subsets.” Cytometry. Part A: The
+Journal of the International Society for Analytical Cytology 85 (7):
+573–75.</p>
 <p>Liechti, Thomas, Lukas M. Weber, Thomas M. Ashhurst, Natalie Stanley,
 Martin Prlic, Sofie Van Gassen, and Florian Mair. 2021. “An Updated
 Guide for the Perplexed: Cytometry in the High-Dimensional Era.” Nature
