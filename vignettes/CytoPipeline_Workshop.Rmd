@@ -112,21 +112,18 @@ and dead cells.
 
 ### The example dataset
 
-In order to demonstrate CytoPipeline usage, we will use of an example dataset, 
-the _HBV mouse dataset_. This dataset was collected during a preclinical study 
-aimed at assessing the effect of different therapeutic vaccine regimens 
-on the immune response of Hepatitis B Virus transduced mice.
+The example dataset that will be used throughout this vignette is derived from 
+a reference public dataset accompanying the OMIP-021 (Optimized Multicolor 
+Immunofluorescence Panel 021) article (Gherardin et al, 2014).  
 
-In short, 55 mice, split in 5 different experimental groups, 
-according to their vaccine regimen or HBV transduction status, were immunized 
-at different timepoints. Upon sacrifice, liver tissue sample fragments 
-were collected, treated as to isolate the lymphocytes cell population, 
-and subsequently analysed in a flow cytometer for immuno-phenotyping. 
-This experiment resulted in the acquisition of 55 `fcs` raw data file, 
-with a flow cytometry panel of 12 different channels.
+A sub-sample of this public dataset, with 2 *fcs* files containing measurements 
+of 16 markers for 5,000 events each, is built-in in the `CytoPipeline` 
+package, as the *OMIP021* dataset. 
 
-Here we will work on a small subset of this dataset, containing 
-two samples, respectively labelled _D91_A01_ and _D93_C01_.
+See the `MakeOMIP021Samples.R` script for more details 
+on how the `OMIP021` dataset was created. This script is to be found 
+in the `script` subdirectory in the `CytoPipeline` package installation path.
+
 
 ### Target pipelines 
 
@@ -193,14 +190,12 @@ also contains the list of parameters that are used as arguments to the function.
 ```{r preliminaries, include = FALSE}
 # preliminaries : define sample files and and set path to results output 
 
-rawDataDir <- "./rawData"
+rawDataDir <- system.file("extdata", package = "CytoPipeline")
 resultsDir <- 
     "./Results"
 
-mySamples <- 
-    file.path(rawDataDir, 
-    c("D91_G01.fcs",
-      "D91_A01.fcs"))
+mySamples <- file.path(rawDataDir, list.files(rawDataDir,
+                                              pattern = "Donor"))
 
 ```
 
@@ -251,10 +246,10 @@ pipL0
 
 However, the easiest, and most concise way to define a *CytoPipeline* object 
 is by using a json file. Here we will use the following input file, 
-which specifies the *PeacoQC* pipeline as described above.
+which specifies the *flowAI* pipeline as described above.
 
 ```{r jsonFileShow, comment = ''}
-jsonFile <- ("CytoPipeline_Demo_pipeline.json")
+jsonFile <- ("CytoPipeline_Demo_fAI.json")
 cat(readLines(jsonFile), sep = '\n')
 ```
 
@@ -283,7 +278,7 @@ visualize the pipeline as a workflow plot, using the
 `CytoPipeline::plotCytoPipelineProcessingQueue()` function.  
 
 
-```{r step2:plot, out.height=450, out.width=600, fig.height=4.5, fig.width=6, fig.align='center'}
+```{r step2_plot, out.height=450, out.width=600, fig.height=4.5, fig.width=6, fig.align='center'}
 plotCytoPipelineProcessingQueue(pipL, 
                                 whichQueue = "pre-processing",
                                 path = resultsDir,
@@ -326,11 +321,11 @@ plotCytoPipelineProcessingQueue(pipL,
 
 ```
 
-Note that the first three bubbles are now highlighted in green, showing that
-the first three steps have now produced results. These results have in fact
+Note that the first five bubbles are now highlighted in green, showing that
+the first five steps have now produced results. These results have in fact
 been saved in a data cache, allowing for further visualization of the results.  
 
-However, as mentioned earlier, the fourth step, 'remove_debris', 
+However, as mentioned earlier, the sixth step, 'remove_debris', 
 has resulted in an error, hence there is still not corresponding results, 
 and so the corresponding bubble is still displayed with an orange contour.  
 
@@ -339,7 +334,7 @@ the same experiment name :
 
 ```{r step2_ok, out.height=450, out.width=600, fig.height=4.5, fig.width=6, fig.align='center'}
 
-jsonFile <- ("CytoPipeline_Demo_pipeline2.json")
+jsonFile <- ("CytoPipeline_Demo_fAI_2.json")
 
 # creation of CytoPipeline object,
 # using json file as input
@@ -355,12 +350,11 @@ plotCytoPipelineProcessingQueue(pipL,
                                 path = resultsDir,
                                 sampleFile = 1)
 
-
 ```
 
 
 The pipeline now executes correctly! Note that all steps that were previously 
-correctly executed are not re-run, the results are indeed read from the data 
+correctly executed are not re-run, the results are instead read from the data 
 cache.
 
 <br/>
@@ -376,9 +370,9 @@ CytoPipelineGUI::CytoPipelineCheckApp(dir = resultsDir)
 ```
 
 When visualizing interactively the results of our pipeline, more specifically 
-when looking at the `remove_debris` step, we can notice that this step 
-was not totally effective in removing all undesirable events in the FSC-A/SSC-A 
-2D representation. 
+when looking at the `remove_debris` step in the FSC-A/SSC-A 2D representation, 
+we can notice that, for the second sample, this step eliminated much more 
+than the undesirable debris events. This has to be improved! 
 
 <br/>
 
@@ -388,7 +382,7 @@ if (!interactive()) {
     p1 <- CytoPipelineGUI::plotSelectedFlowFrame(
     experimentName = expName,
     whichQueue = "pre-processing",
-    sampleFile = 1,
+    sampleFile = 2,
     flowFrameName = "remove_doublets_obj",
     path = resultsDir,
     xChannelLabel = "FSC-A : NA",
@@ -400,7 +394,7 @@ if (!interactive()) {
 p2 <- CytoPipelineGUI::plotSelectedFlowFrame(
     experimentName = expName,
     whichQueue = "pre-processing",
-    sampleFile = 1,
+    sampleFile = 2,
     flowFrameName = "remove_debris_obj",
     path = resultsDir,
     xChannelLabel = "FSC-A : NA",
@@ -413,13 +407,13 @@ p3 <- CytoPipelineGUI::plotDiffFlowFrame(
     path = resultsDir,
     experimentNameFrom = expName,
     whichQueueFrom = "pre-processing",
-    sampleFileFrom = 1,
+    sampleFileFrom = 2,
     flowFrameNameFrom = "remove_doublets_obj",
     xChannelLabelFrom = "FSC-A : NA",
     yChannelLabelFrom = "SSC-A : NA",
     experimentNameTo = expName,
     whichQueueTo = "pre-processing",
-    sampleFileTo = 1,
+    sampleFileTo = 2,
     flowFrameNameTo = "remove_debris_obj",
     xChannelLabelTo = "FSC-A : NA",
     yChannelLabelTo = "SSC-A : NA",
@@ -436,20 +430,20 @@ p3 <- CytoPipelineGUI::plotDiffFlowFrame(
 ### Running the same pipeline with different function parameters
 
 In order to cope with the issue of the `remove_debris`step, we create a new
-pipeline with the same steps, only we use `nClust = 2` instead of `nClust = 3` 
+pipeline with the same steps, only we use `nClust = 3` instead of `nClust = 2` 
 as the number of clusters to be found during this step. We run this amended 
 version of the pipeline under a new experiment name, in order to allow for
 visual comparison of results between the two versions.
 
-```{r step3:nClust-2, out.height=450, out.width=600, fig.height=4.5, fig.width=6, fig.align='center'}
+```{r step3_nClust_3, out.height=450, out.width=600, fig.height=4.5, fig.width=6, fig.align='center'}
 
 # 3.
 
-# create pipeline with nClust = 2
+# create pipeline with nClust = 3
 
-expName <- "CytoPipeline_Demo_2C"
+expName <- "CytoPipeline_Demo_3C"
 
-jsonFile <- ("CytoPipeline_Demo_pipeline_2C.json")
+jsonFile <- ("CytoPipeline_Demo_fAI_3C.json")
 
 pipL2 <- CytoPipeline(jsonFile,
                       experimentName = expName,
@@ -462,12 +456,13 @@ execute(pipL2, path = resultsDir)
 plotCytoPipelineProcessingQueue(pipL2, 
                                 whichQueue = "pre-processing",
                                 path = resultsDir,
-                                sampleFile = 1)
+                                sampleFile = 2)
 ```
 
 Now that this pipeline has run until completion, we can now visualize 
 interactively what the `remove_debris` gives as results, 
-with this new `nClust = 2` parameter : 
+with this new `nClust = 3` parameter. We can notice that the debris removal,
+for sample 2, has worked much better with this new parameter setting.
 
 ``` {r, step3::resultsViz}
 
@@ -482,7 +477,7 @@ if (!interactive()) {
     p1 <- CytoPipelineGUI::plotSelectedFlowFrame(
         experimentName = expName,
         whichQueue = "pre-processing",
-        sampleFile = 1, #D91_G01
+        sampleFile = 2,
         flowFrameName = "remove_doublets_obj",
         path = resultsDir,
         xChannelLabel = "FSC-A : NA",
@@ -494,7 +489,7 @@ if (!interactive()) {
     p2 <- CytoPipelineGUI::plotSelectedFlowFrame(
         experimentName = expName,
         whichQueue = "pre-processing",
-        sampleFile = 1, #D91_G01
+        sampleFile = 2,
         flowFrameName = "remove_debris_obj",
         path = resultsDir,
         xChannelLabel = "FSC-A : NA",
@@ -507,13 +502,13 @@ if (!interactive()) {
         path = resultsDir,
         experimentNameFrom = expName,
         whichQueueFrom = "pre-processing",
-        sampleFileFrom = 1, #D91_G01
+        sampleFileFrom = 2,
         flowFrameNameFrom = "remove_doublets_obj",
         xChannelLabelFrom = "FSC-A : NA",
         yChannelLabelFrom = "SSC-A : NA",
         experimentNameTo = expName,
         whichQueueTo = "pre-processing",
-        sampleFileTo = 1, #D91_G01
+        sampleFileTo = 2,
         flowFrameNameTo = "remove_debris_obj",
         xChannelLabelTo = "FSC-A : NA",
         yChannelLabelTo = "SSC-A : NA",
@@ -527,13 +522,14 @@ if (!interactive()) {
 
 ### Comparing pipelines
 
-In this section, we will run the alternative pipeline using *flowAI* as 
-QC in time method. As mentioned in the introduction, this implies a slightly 
+In this section, we will run the alternative pipeline using *PeacoQC* as 
+QC in time method, and then compare with what we get with *flowAI*. 
+As mentioned in the introduction, the *PeacoQC* pipeline implies a slightly 
 order of the steps as well. The pipeline is described in the following 
 json file:
 
 ```{r jsonFileFlowAIShow, comment = ''}
-jsonFile <- ("CytoPipeline_Demo_pipeline_flowAI.json")
+jsonFile <- ("CytoPipeline_Demo_PQC.json")
 cat(readLines(jsonFile), sep = '\n')
 ```
 
@@ -543,17 +539,17 @@ Let us now create a new CytoPipeline object, and execute it.
 # 4.
 # creation of a new CytoPipeline object,
 # using json file as input (flowAI)
-pipL_flowAI <- CytoPipeline(jsonFile,
-                            experimentName = "CytoPipeline_Demo_flowAI",
-                            sampleFiles = mySamples)
+pipL_PQC <- CytoPipeline(jsonFile,
+                         experimentName = "CytoPipeline_Demo_PQC",
+                         sampleFiles = mySamples)
 
 # display CytoPipeline object
-pipL_flowAI
+pipL_PQC
 
 # execute pipeline
-execute(pipL_flowAI, path = resultsDir)
+execute(pipL_PQC, path = resultsDir)
 
-plotCytoPipelineProcessingQueue(pipL_flowAI, 
+plotCytoPipelineProcessingQueue(pipL_PQC, 
                                 whichQueue = "pre-processing",
                                 path = resultsDir,
                                 sampleFile = 1)
@@ -567,12 +563,14 @@ CytoPipelineGUI::CytoPipelineCheckApp(dir = resultsDir)
 ```
 
 ```{r, step4_viz_prog, out.height=300, out.width=900, fig.height=6, fig.width=18, fig.align='center', echo = FALSE, message = FALSE}
+expName1 <- "CytoPipeline_Demo_3C"
+expName2 <- "CytoPipeline_Demo_PQC"
 if (!interactive()) {
     p1 <- CytoPipelineGUI::plotSelectedFlowFrame(
-        experimentName = expName,
+        experimentName = expName1,
         whichQueue = "pre-processing",
-        sampleFile = 2, # D91_A01
-        flowFrameName = "remove_doublets_obj",
+        sampleFile = 2,
+        flowFrameName = "perform_QC_obj",
         path = resultsDir,
         xChannelLabel = "Time : NA",
         yChannelLabel = "FSC-A : NA",
@@ -580,10 +578,10 @@ if (!interactive()) {
         useFixedLinearRange = FALSE)
     
     p2 <- CytoPipelineGUI::plotSelectedFlowFrame(
-        experimentName = expName,
+        experimentName = expName2,
         whichQueue = "pre-processing",
-        sampleFile = 2, # D91_A01
-        flowFrameName = "remove_debris_obj",
+        sampleFile = 2, 
+        flowFrameName = "perform_QC_obj",
         path = resultsDir,
         xChannelLabel = "Time : NA",
         yChannelLabel = "FSC-A : NA",
@@ -592,16 +590,16 @@ if (!interactive()) {
     
     p3 <- CytoPipelineGUI::plotDiffFlowFrame(
         path = resultsDir,
-        experimentNameFrom = expName,
+        experimentNameFrom = expName1,
         whichQueueFrom = "pre-processing",
-        sampleFileFrom = 2, # D91_A01
-        flowFrameNameFrom = "remove_doublets_obj",
+        sampleFileFrom = 2, 
+        flowFrameNameFrom = "perform_QC_obj",
         xChannelLabelFrom = "Time : NA",
         yChannelLabelFrom = "FSC-A : NA",
-        experimentNameTo = expName,
+        experimentNameTo = expName2,
         whichQueueTo = "pre-processing",
         sampleFileTo = 2,
-        flowFrameNameTo = "remove_debris_obj",
+        flowFrameNameTo = "perform_QC_obj",
         xChannelLabelTo = "Time : NA",
         yChannelLabelTo = "FSC-A : NA",
         useAllCells = TRUE,
@@ -654,7 +652,7 @@ For this, the `rmCache` parameter of the `execute()` function can be set to
 ```{r, step6a}
 # 6a. execute pipeline with rmCache = TRUE
 
-execute(pipL_flowAI, path = resultsDir, rmCache = TRUE)
+execute(pipL_PQC, path = resultsDir, rmCache = TRUE)
 ```
 
 ### Running sample files in parallel
@@ -669,7 +667,7 @@ backend (MulticoreParams, SnowParam,... ) can be used.
 # 6b. execute pipeline in parallel
 bp <- BiocParallel::SnowParam(progressbar = TRUE)
 
-execute(pipL_flowAI, path = resultsDir, rmCache = TRUE, useBiocParallel = TRUE,
+execute(pipL_PQC, path = resultsDir, rmCache = TRUE, useBiocParallel = TRUE,
         BPPARAM = bp,
         BPOPTIONS = BiocParallel::bpoptions(package = c("flowCore", 
                                                         "CytoPipelineUtils")))
@@ -690,6 +688,13 @@ Sofie Van Gassen, and Yvan Saeys. 2021.
 “PeacoQC: Peak-Based Selection of High Quality Cytometry Data.” 
 Cytometry. Part A: The Journal of the International Society 
 for Analytical Cytology, September. https://doi.org/10.1002/cyto.a.24501.
+
+Gherardin, Nicholas A., David S. Ritchie, Dale I. Godfrey, 
+and Paul J. Neeson. 2014. 
+“OMIP-021: Simultaneous Quantification of Human Conventional and 
+Innate-like T-Cell Subsets.” 
+Cytometry. Part A: The Journal of the International Society 
+for Analytical Cytology 85 (7): 573–75.
 
 Liechti, Thomas, Lukas M. Weber, Thomas M. Ashhurst, Natalie Stanley, 
 Martin Prlic, Sofie Van Gassen, and Florian Mair. 2021. 
