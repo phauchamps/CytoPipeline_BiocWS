@@ -770,7 +770,7 @@ applications implemented in the <em>CytoPipelineGUI</em> package.</p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span></span>
 <span><span class="co"># launch shiny app</span></span>
-<span><span class="fu">CytoPipelineGUI</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/CytoPipelineGUI/man/CytoPipelineCheckApp.html" class="external-link">CytoPipelineCheckApp</a></span><span class="op">(</span>dir <span class="op">=</span> <span class="va">resultsDir</span><span class="op">)</span></span></code></pre></div>
+<span><span class="co">#CytoPipelineGUI::CytoPipelineCheckApp(dir = resultsDir)</span></span></code></pre></div>
 <p>When visualizing interactively the results of our pipeline, more
 specifically when looking at the <code>remove_debris</code> step in the
 FSC-A/SSC-A 2D representation, we can notice that, for the second
@@ -888,7 +888,7 @@ parameter setting.</p>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span></span>
 <span><span class="co"># launch shiny app</span></span>
-<span><span class="fu">CytoPipelineGUI</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/CytoPipelineGUI/man/CytoPipelineCheckApp.html" class="external-link">CytoPipelineCheckApp</a></span><span class="op">(</span>dir <span class="op">=</span> <span class="va">resultsDir</span><span class="op">)</span></span></code></pre></div>
+<span><span class="co">#CytoPipelineGUI::CytoPipelineCheckApp(dir = resultsDir)</span></span></code></pre></div>
 <p><img src="CytoPipeline_Workshop_files/figure-html/step3_viz_prog-1.png" width="900" height="300" style="display: block; margin: auto;"></p>
 </div>
 <div class="section level4">
@@ -1204,7 +1204,7 @@ The pipeline is described in the following json file:</p>
 <p>The pipeline having run until completion, time to visualize the
 results!</p>
 <div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu">CytoPipelineGUI</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/CytoPipelineGUI/man/CytoPipelineCheckApp.html" class="external-link">CytoPipelineCheckApp</a></span><span class="op">(</span>dir <span class="op">=</span> <span class="va">resultsDir</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="co">#CytoPipelineGUI::CytoPipelineCheckApp(dir = resultsDir)</span></span></code></pre></div>
 <p><img src="CytoPipeline_Workshop_files/figure-html/step4_viz_prog-1.png" width="900" height="300" style="display: block; margin: auto;"></p>
 </div>
 </div>
@@ -1222,7 +1222,7 @@ transformation, and save the results in a RDS object. This object can
 then be re-used in another pipeline instance.</p>
 <div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># 5. show scale transformations</span></span>
-<span><span class="fu">CytoPipelineGUI</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/CytoPipelineGUI/man/ScaleTransformApp.html" class="external-link">ScaleTransformApp</a></span><span class="op">(</span>dir <span class="op">=</span> <span class="va">resultsDir</span><span class="op">)</span></span></code></pre></div>
+<span><span class="co">#CytoPipelineGUI::ScaleTransformApp(dir = resultsDir)</span></span></code></pre></div>
 </div>
 <div class="section level3">
 <h3 id="some-technical-options-to-fine-tune-pipeline-execution">Some technical options to fine-tune pipeline execution<a class="anchor" aria-label="anchor" href="#some-technical-options-to-fine-tune-pipeline-execution"></a>
@@ -1377,16 +1377,16 @@ used.</p>
 <span id="cb16-36"><a href="#cb16-36" tabindex="-1"></a>  <span class="sc">|</span>                                                                            </span>
 <span id="cb16-37"><a href="#cb16-37" tabindex="-1"></a>  <span class="er">|</span>                                                                      <span class="er">|</span>   <span class="dv">0</span>%</span>
 <span id="cb16-38"><a href="#cb16-38" tabindex="-1"></a><span class="co">#&gt; #####################################################</span></span>
-<span id="cb16-39"><a href="#cb16-39" tabindex="-1"></a><span class="co">#&gt; </span><span class="al">###</span><span class="co"> NOW PRE-PROCESSING FILE /usr/local/lib/R/site-library/CytoPipeline/extdata/Donor1.fcs...</span></span>
+<span id="cb16-39"><a href="#cb16-39" tabindex="-1"></a><span class="co">#&gt; </span><span class="al">###</span><span class="co"> NOW PRE-PROCESSING FILE /usr/local/lib/R/site-library/CytoPipeline/extdata/Donor2.fcs...</span></span>
 <span id="cb16-40"><a href="#cb16-40" tabindex="-1"></a><span class="co">#&gt; #####################################################</span></span>
 <span id="cb16-41"><a href="#cb16-41" tabindex="-1"></a><span class="co">#&gt; Proceeding with step 1 [flowframe_read] ...</span></span>
 <span id="cb16-42"><a href="#cb16-42" tabindex="-1"></a><span class="co">#&gt; Proceeding with step 2 [remove_margins] ...</span></span>
-<span id="cb16-43"><a href="#cb16-43" tabindex="-1"></a><span class="co">#&gt; Removing margins from file : Donor1.fcs</span></span>
+<span id="cb16-43"><a href="#cb16-43" tabindex="-1"></a><span class="co">#&gt; Removing margins from file : Donor2.fcs</span></span>
 <span id="cb16-44"><a href="#cb16-44" tabindex="-1"></a><span class="co">#&gt; Proceeding with step 3 [compensate] ...</span></span>
-<span id="cb16-45"><a href="#cb16-45" tabindex="-1"></a><span class="co">#&gt; Compensating file : Donor1.fcs</span></span>
+<span id="cb16-45"><a href="#cb16-45" tabindex="-1"></a><span class="co">#&gt; Compensating file : Donor2.fcs</span></span>
 <span id="cb16-46"><a href="#cb16-46" tabindex="-1"></a><span class="co">#&gt; Proceeding with step 4 [perform_QC] ...</span></span>
 <span id="cb16-47"><a href="#cb16-47" tabindex="-1"></a><span class="co">#&gt; Applying PeacoQC method...</span></span>
-<span id="cb16-48"><a href="#cb16-48" tabindex="-1"></a><span class="co">#&gt; Starting quality control analysis for Donor1.fcs</span></span>
+<span id="cb16-48"><a href="#cb16-48" tabindex="-1"></a><span class="co">#&gt; Starting quality control analysis for Donor2.fcs</span></span>
 <span id="cb16-49"><a href="#cb16-49" tabindex="-1"></a><span class="co">#&gt; Calculating peaks</span></span>
 <span id="cb16-50"><a href="#cb16-50" tabindex="-1"></a><span class="co">#&gt; </span></span>
 <span id="cb16-51"><a href="#cb16-51" tabindex="-1"></a>  <span class="sc">|</span>                                                        </span>
@@ -1431,14 +1431,14 @@ used.</p>
 <span id="cb16-90"><a href="#cb16-90" tabindex="-1"></a>  <span class="er">|</span><span class="sc">++++++++++++++++++++++++++++++++++++++++++++++++</span>  <span class="er">|</span>  <span class="dv">95</span>%</span>
 <span id="cb16-91"><a href="#cb16-91" tabindex="-1"></a>  <span class="sc">|</span>                                                        </span>
 <span id="cb16-92"><a href="#cb16-92" tabindex="-1"></a>  <span class="er">|</span><span class="sc">++++++++++++++++++++++++++++++++++++++++++++++++++</span><span class="er">|</span> <span class="dv">100</span>%</span>
-<span id="cb16-93"><a href="#cb16-93" tabindex="-1"></a><span class="co">#&gt; MAD analysis removed 5.32% of the measurements</span></span>
-<span id="cb16-94"><a href="#cb16-94" tabindex="-1"></a><span class="co">#&gt; The algorithm removed 5.32% of the measurements</span></span>
+<span id="cb16-93"><a href="#cb16-93" tabindex="-1"></a><span class="co">#&gt; MAD analysis removed 1% of the measurements</span></span>
+<span id="cb16-94"><a href="#cb16-94" tabindex="-1"></a><span class="co">#&gt; The algorithm removed 1% of the measurements</span></span>
 <span id="cb16-95"><a href="#cb16-95" tabindex="-1"></a><span class="co">#&gt; Proceeding with step 5 [remove_doublets] ...</span></span>
 <span id="cb16-96"><a href="#cb16-96" tabindex="-1"></a><span class="co">#&gt; Proceeding with step 6 [remove_debris] ...</span></span>
 <span id="cb16-97"><a href="#cb16-97" tabindex="-1"></a><span class="co">#&gt; The prior specification has no effect when usePrior=no</span></span>
 <span id="cb16-98"><a href="#cb16-98" tabindex="-1"></a><span class="co">#&gt; Using the serial version of flowClust</span></span>
 <span id="cb16-99"><a href="#cb16-99" tabindex="-1"></a><span class="co">#&gt; Proceeding with step 7 [remove_dead_cells] ...</span></span>
-<span id="cb16-100"><a href="#cb16-100" tabindex="-1"></a><span class="co">#&gt; Removing Dead Cells events (using flowDensity::deGate()) from file : Donor1.fcs</span></span>
+<span id="cb16-100"><a href="#cb16-100" tabindex="-1"></a><span class="co">#&gt; Removing Dead Cells events (using flowDensity::deGate()) from file : Donor2.fcs</span></span>
 <span id="cb16-101"><a href="#cb16-101" tabindex="-1"></a><span class="co">#&gt; The legacy packages maptools, rgdal, and rgeos, underpinning the sp package,</span></span>
 <span id="cb16-102"><a href="#cb16-102" tabindex="-1"></a><span class="co">#&gt; which was just loaded, will retire in October 2023.</span></span>
 <span id="cb16-103"><a href="#cb16-103" tabindex="-1"></a><span class="co">#&gt; Please refer to R-spatial evolution reports for details, especially</span></span>
@@ -1459,16 +1459,16 @@ used.</p>
 <span id="cb16-118"><a href="#cb16-118" tabindex="-1"></a>  <span class="sc">|</span>                                                                            </span>
 <span id="cb16-119"><a href="#cb16-119" tabindex="-1"></a>  <span class="er">|===================================</span>                                   <span class="er">|</span>  <span class="dv">50</span>%</span>
 <span id="cb16-120"><a href="#cb16-120" tabindex="-1"></a><span class="co">#&gt; #####################################################</span></span>
-<span id="cb16-121"><a href="#cb16-121" tabindex="-1"></a><span class="co">#&gt; </span><span class="al">###</span><span class="co"> NOW PRE-PROCESSING FILE /usr/local/lib/R/site-library/CytoPipeline/extdata/Donor2.fcs...</span></span>
+<span id="cb16-121"><a href="#cb16-121" tabindex="-1"></a><span class="co">#&gt; </span><span class="al">###</span><span class="co"> NOW PRE-PROCESSING FILE /usr/local/lib/R/site-library/CytoPipeline/extdata/Donor1.fcs...</span></span>
 <span id="cb16-122"><a href="#cb16-122" tabindex="-1"></a><span class="co">#&gt; #####################################################</span></span>
 <span id="cb16-123"><a href="#cb16-123" tabindex="-1"></a><span class="co">#&gt; Proceeding with step 1 [flowframe_read] ...</span></span>
 <span id="cb16-124"><a href="#cb16-124" tabindex="-1"></a><span class="co">#&gt; Proceeding with step 2 [remove_margins] ...</span></span>
-<span id="cb16-125"><a href="#cb16-125" tabindex="-1"></a><span class="co">#&gt; Removing margins from file : Donor2.fcs</span></span>
+<span id="cb16-125"><a href="#cb16-125" tabindex="-1"></a><span class="co">#&gt; Removing margins from file : Donor1.fcs</span></span>
 <span id="cb16-126"><a href="#cb16-126" tabindex="-1"></a><span class="co">#&gt; Proceeding with step 3 [compensate] ...</span></span>
-<span id="cb16-127"><a href="#cb16-127" tabindex="-1"></a><span class="co">#&gt; Compensating file : Donor2.fcs</span></span>
+<span id="cb16-127"><a href="#cb16-127" tabindex="-1"></a><span class="co">#&gt; Compensating file : Donor1.fcs</span></span>
 <span id="cb16-128"><a href="#cb16-128" tabindex="-1"></a><span class="co">#&gt; Proceeding with step 4 [perform_QC] ...</span></span>
 <span id="cb16-129"><a href="#cb16-129" tabindex="-1"></a><span class="co">#&gt; Applying PeacoQC method...</span></span>
-<span id="cb16-130"><a href="#cb16-130" tabindex="-1"></a><span class="co">#&gt; Starting quality control analysis for Donor2.fcs</span></span>
+<span id="cb16-130"><a href="#cb16-130" tabindex="-1"></a><span class="co">#&gt; Starting quality control analysis for Donor1.fcs</span></span>
 <span id="cb16-131"><a href="#cb16-131" tabindex="-1"></a><span class="co">#&gt; Calculating peaks</span></span>
 <span id="cb16-132"><a href="#cb16-132" tabindex="-1"></a><span class="co">#&gt; </span></span>
 <span id="cb16-133"><a href="#cb16-133" tabindex="-1"></a>  <span class="sc">|</span>                                                        </span>
@@ -1513,14 +1513,14 @@ used.</p>
 <span id="cb16-172"><a href="#cb16-172" tabindex="-1"></a>  <span class="er">|</span><span class="sc">++++++++++++++++++++++++++++++++++++++++++++++++</span>  <span class="er">|</span>  <span class="dv">95</span>%</span>
 <span id="cb16-173"><a href="#cb16-173" tabindex="-1"></a>  <span class="sc">|</span>                                                        </span>
 <span id="cb16-174"><a href="#cb16-174" tabindex="-1"></a>  <span class="er">|</span><span class="sc">++++++++++++++++++++++++++++++++++++++++++++++++++</span><span class="er">|</span> <span class="dv">100</span>%</span>
-<span id="cb16-175"><a href="#cb16-175" tabindex="-1"></a><span class="co">#&gt; MAD analysis removed 1% of the measurements</span></span>
-<span id="cb16-176"><a href="#cb16-176" tabindex="-1"></a><span class="co">#&gt; The algorithm removed 1% of the measurements</span></span>
+<span id="cb16-175"><a href="#cb16-175" tabindex="-1"></a><span class="co">#&gt; MAD analysis removed 5.32% of the measurements</span></span>
+<span id="cb16-176"><a href="#cb16-176" tabindex="-1"></a><span class="co">#&gt; The algorithm removed 5.32% of the measurements</span></span>
 <span id="cb16-177"><a href="#cb16-177" tabindex="-1"></a><span class="co">#&gt; Proceeding with step 5 [remove_doublets] ...</span></span>
 <span id="cb16-178"><a href="#cb16-178" tabindex="-1"></a><span class="co">#&gt; Proceeding with step 6 [remove_debris] ...</span></span>
 <span id="cb16-179"><a href="#cb16-179" tabindex="-1"></a><span class="co">#&gt; The prior specification has no effect when usePrior=no</span></span>
 <span id="cb16-180"><a href="#cb16-180" tabindex="-1"></a><span class="co">#&gt; Using the serial version of flowClust</span></span>
 <span id="cb16-181"><a href="#cb16-181" tabindex="-1"></a><span class="co">#&gt; Proceeding with step 7 [remove_dead_cells] ...</span></span>
-<span id="cb16-182"><a href="#cb16-182" tabindex="-1"></a><span class="co">#&gt; Removing Dead Cells events (using flowDensity::deGate()) from file : Donor2.fcs</span></span>
+<span id="cb16-182"><a href="#cb16-182" tabindex="-1"></a><span class="co">#&gt; Removing Dead Cells events (using flowDensity::deGate()) from file : Donor1.fcs</span></span>
 <span id="cb16-183"><a href="#cb16-183" tabindex="-1"></a><span class="co">#&gt; The legacy packages maptools, rgdal, and rgeos, underpinning the sp package,</span></span>
 <span id="cb16-184"><a href="#cb16-184" tabindex="-1"></a><span class="co">#&gt; which was just loaded, will retire in October 2023.</span></span>
 <span id="cb16-185"><a href="#cb16-185" tabindex="-1"></a><span class="co">#&gt; Please refer to R-spatial evolution reports for details, especially</span></span>
