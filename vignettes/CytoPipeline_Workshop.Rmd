@@ -370,7 +370,7 @@ implemented in the *CytoPipelineGUI* package.
 ```{r, step2_viz}
 
 # launch shiny app
-CytoPipelineGUI::CytoPipelineCheckApp(dir = resultsDir)
+#CytoPipelineGUI::CytoPipelineCheckApp(dir = resultsDir)
 
 ```
 
@@ -472,7 +472,7 @@ for sample 2, has worked much better with this new parameter setting.
 ``` {r, step3::resultsViz}
 
 # launch shiny app
-CytoPipelineGUI::CytoPipelineCheckApp(dir = resultsDir)
+#CytoPipelineGUI::CytoPipelineCheckApp(dir = resultsDir)
 
 ```
 
@@ -564,7 +564,7 @@ plotCytoPipelineProcessingQueue(pipL_PQC,
 The pipeline having run until completion, time to visualize the results!
 
 ``` {r, step4::resultsViz}
-CytoPipelineGUI::CytoPipelineCheckApp(dir = resultsDir)
+#CytoPipelineGUI::CytoPipelineCheckApp(dir = resultsDir)
 ```
 
 ```{r, step4_viz_prog, out.height=300, out.width=900, fig.height=6, fig.width=18, fig.align='center', echo = FALSE, message = FALSE}
@@ -629,7 +629,7 @@ pipeline instance.
 
 ```{r, step5}
 # 5. show scale transformations
-CytoPipelineGUI::ScaleTransformApp(dir = resultsDir)
+#CytoPipelineGUI::ScaleTransformApp(dir = resultsDir)
 ```
 
 ## Some technical options to fine-tune pipeline execution
