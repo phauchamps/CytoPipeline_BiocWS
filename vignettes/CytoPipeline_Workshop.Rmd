@@ -19,12 +19,13 @@ knitr::opts_chunk$set(
 ```
 
 ```{r pkg, include = FALSE}
+require(CytoPipeline)
 require(CytoPipelineGUI)
 require(CytoPipelineUtils)
 require(patchwork)
 ```
 
-Last modified: 22 August, 2023.
+Last modified: 28 August, 2023.
 
 <br/>
 
@@ -191,8 +192,12 @@ also contains the list of parameters that are used as arguments to the function.
 # preliminaries : define sample files and and set path to results output 
 
 rawDataDir <- system.file("extdata", package = "CytoPipeline")
+
 resultsDir <- 
     "./Results"
+# clean up previous rmd runs if necessary
+unlink(resultsDir, recursive = TRUE)
+dir.create(resultsDir)
 
 mySamples <- file.path(rawDataDir, list.files(rawDataDir,
                                               pattern = "Donor"))
