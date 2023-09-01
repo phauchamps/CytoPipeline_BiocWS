@@ -194,7 +194,7 @@ also contains the list of parameters that are used as arguments to the function.
 rawDataDir <- system.file("extdata", package = "CytoPipeline")
 
 resultsDir <- 
-    "./Results"
+    "~/Results"
 # clean up previous rmd runs if necessary
 unlink(resultsDir, recursive = TRUE)
 dir.create(resultsDir)
