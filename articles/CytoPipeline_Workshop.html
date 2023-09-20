@@ -644,8 +644,6 @@ needed steps, we can run it, by calling the
 <span><span class="co">#&gt; Proceeding with step 3 [perform_QC] ...</span></span>
 <span><span class="co">#&gt; Applying flowAI method...</span></span>
 <span><span class="co">#&gt; Quality control for the file: Donor1</span></span>
-<span><span class="co">#&gt; Warning in ord_fcs_time(set[[i]], timeCh): Expression data in the file</span></span>
-<span><span class="co">#&gt; Donor1.fcs were not originally ordered by time.</span></span>
 <span><span class="co">#&gt; 3.56% of anomalous cells detected in the flow rate check. </span></span>
 <span><span class="co">#&gt; 0% of anomalous cells detected in signal acquisition check. </span></span>
 <span><span class="co">#&gt; 0.02% of anomalous cells detected in the dynamic range check.</span></span>
@@ -653,7 +651,7 @@ needed steps, we can run it, by calling the
 <span><span class="co">#&gt; Compensating file : Donor1.fcs</span></span>
 <span><span class="co">#&gt; Proceeding with step 5 [remove_doublets] ...</span></span>
 <span><span class="co">#&gt; Proceeding with step 6 [remove_debris] ...</span></span>
-<span><span class="co">#&gt; Error in removeDebrisFlowClustTmix(new("flowFrame", exprs = structure(c(7482.96044921875,  : </span></span>
+<span><span class="co">#&gt; Error in removeDebrisFlowClustTmix(new("flowFrame", exprs = structure(c(30859.201171875,  : </span></span>
 <span><span class="co">#&gt;   argument "nClust" is missing, with no default</span></span></code></pre></div>
 <p>Here, this leads to an error message in the
 <code>remove_debris</code> step, complaining that the
@@ -711,8 +709,6 @@ under the same experiment name :</p>
 <span><span class="co">#&gt; Using the serial version of flowClust</span></span>
 <span><span class="co">#&gt; Proceeding with step 7 [remove_dead_cells] ...</span></span>
 <span><span class="co">#&gt; Removing Dead Cells events (using flowDensity::deGate()) from file : Donor1.fcs</span></span>
-<span><span class="co">#&gt; Warning: replacing previous import 'RPMG::ColorScale' by 'GEOmap::ColorScale'</span></span>
-<span><span class="co">#&gt; when loading 'RFOC'</span></span>
 <span><span class="co">#&gt; The legacy packages maptools, rgdal, and rgeos, underpinning the sp package,</span></span>
 <span><span class="co">#&gt; which was just loaded, will retire in October 2023.</span></span>
 <span><span class="co">#&gt; Please refer to R-spatial evolution reports for details, especially</span></span>
@@ -740,8 +736,6 @@ under the same experiment name :</p>
 <span><span class="co">#&gt; Proceeding with step 3 [perform_QC] ...</span></span>
 <span><span class="co">#&gt; Applying flowAI method...</span></span>
 <span><span class="co">#&gt; Quality control for the file: Donor2</span></span>
-<span><span class="co">#&gt; Warning in ord_fcs_time(set[[i]], timeCh): Expression data in the file</span></span>
-<span><span class="co">#&gt; Donor2.fcs were not originally ordered by time.</span></span>
 <span><span class="co">#&gt; 3.98% of anomalous cells detected in the flow rate check. </span></span>
 <span><span class="co">#&gt; 0% of anomalous cells detected in signal acquisition check. </span></span>
 <span><span class="co">#&gt; 0.13% of anomalous cells detected in the dynamic range check.</span></span>
@@ -839,8 +833,6 @@ between the two versions.</p>
 <span><span class="co">#&gt; Proceeding with step 3 [perform_QC] ...</span></span>
 <span><span class="co">#&gt; Applying flowAI method...</span></span>
 <span><span class="co">#&gt; Quality control for the file: Donor1</span></span>
-<span><span class="co">#&gt; Warning in ord_fcs_time(set[[i]], timeCh): Expression data in the file</span></span>
-<span><span class="co">#&gt; Donor1.fcs were not originally ordered by time.</span></span>
 <span><span class="co">#&gt; 3.56% of anomalous cells detected in the flow rate check. </span></span>
 <span><span class="co">#&gt; 0% of anomalous cells detected in signal acquisition check. </span></span>
 <span><span class="co">#&gt; 0.02% of anomalous cells detected in the dynamic range check.</span></span>
@@ -861,8 +853,6 @@ between the two versions.</p>
 <span><span class="co">#&gt; Proceeding with step 3 [perform_QC] ...</span></span>
 <span><span class="co">#&gt; Applying flowAI method...</span></span>
 <span><span class="co">#&gt; Quality control for the file: Donor2</span></span>
-<span><span class="co">#&gt; Warning in ord_fcs_time(set[[i]], timeCh): Expression data in the file</span></span>
-<span><span class="co">#&gt; Donor2.fcs were not originally ordered by time.</span></span>
 <span><span class="co">#&gt; 3.98% of anomalous cells detected in the flow rate check. </span></span>
 <span><span class="co">#&gt; 0% of anomalous cells detected in signal acquisition check. </span></span>
 <span><span class="co">#&gt; 0.13% of anomalous cells detected in the dynamic range check.</span></span>
@@ -1149,9 +1139,6 @@ The pipeline is described in the following json file:</p>
 <span><span class="co">#&gt; Compensating file : Donor1.fcs</span></span>
 <span><span class="co">#&gt; Proceeding with step 4 [perform_QC] ...</span></span>
 <span><span class="co">#&gt; Applying PeacoQC method...</span></span>
-<span><span class="co">#&gt; Warning in CheckInputSignalStability(ff, channels, determine_good_cells, :</span></span>
-<span><span class="co">#&gt; There is an inconsistancy in the time channel.  It seems that not all the cells</span></span>
-<span><span class="co">#&gt; are ordered according to time in the flowframe.</span></span>
 <span><span class="co">#&gt; Starting quality control analysis for Donor1.fcs</span></span>
 <span><span class="co">#&gt; Warning in FindIncreasingDecreasingChannels(breaks, ff, channels, plot, : There</span></span>
 <span><span class="co">#&gt; seems to be an increasing or decreasing trend in a channel for Donor1.fcs .</span></span>
@@ -1159,8 +1146,8 @@ The pipeline is described in the following json file:</p>
 <span><span class="co">#&gt; Calculating peaks</span></span>
 <span><span class="co">#&gt; Warning in PeacoQC::PeacoQC(ff = ffIn, channels = channel4QualityControl, :</span></span>
 <span><span class="co">#&gt; There are not enough bins for a robust isolation tree analysis.</span></span>
-<span><span class="co">#&gt; MAD analysis removed 5.32% of the measurements</span></span>
-<span><span class="co">#&gt; The algorithm removed 5.32% of the measurements</span></span>
+<span><span class="co">#&gt; MAD analysis removed 47.4% of the measurements</span></span>
+<span><span class="co">#&gt; The algorithm removed 47.4% of the measurements</span></span>
 <span><span class="co">#&gt; Proceeding with step 5 [remove_doublets] ...</span></span>
 <span><span class="co">#&gt; Proceeding with step 6 [remove_debris] ...</span></span>
 <span><span class="co">#&gt; The prior specification has no effect when usePrior=no</span></span>
@@ -1177,9 +1164,6 @@ The pipeline is described in the following json file:</p>
 <span><span class="co">#&gt; Compensating file : Donor2.fcs</span></span>
 <span><span class="co">#&gt; Proceeding with step 4 [perform_QC] ...</span></span>
 <span><span class="co">#&gt; Applying PeacoQC method...</span></span>
-<span><span class="co">#&gt; Warning in CheckInputSignalStability(ff, channels, determine_good_cells, :</span></span>
-<span><span class="co">#&gt; There is an inconsistancy in the time channel.  It seems that not all the cells</span></span>
-<span><span class="co">#&gt; are ordered according to time in the flowframe.</span></span>
 <span><span class="co">#&gt; Starting quality control analysis for Donor2.fcs</span></span>
 <span><span class="co">#&gt; Warning in FindIncreasingDecreasingChannels(breaks, ff, channels, plot, : There</span></span>
 <span><span class="co">#&gt; seems to be an increasing or decreasing trend in a channel for Donor2.fcs .</span></span>
@@ -1187,8 +1171,8 @@ The pipeline is described in the following json file:</p>
 <span><span class="co">#&gt; Calculating peaks</span></span>
 <span><span class="co">#&gt; Warning in PeacoQC::PeacoQC(ff = ffIn, channels = channel4QualityControl, :</span></span>
 <span><span class="co">#&gt; There are not enough bins for a robust isolation tree analysis.</span></span>
-<span><span class="co">#&gt; MAD analysis removed 1% of the measurements</span></span>
-<span><span class="co">#&gt; The algorithm removed 1% of the measurements</span></span>
+<span><span class="co">#&gt; MAD analysis removed 11.42% of the measurements</span></span>
+<span><span class="co">#&gt; The algorithm removed 11.42% of the measurements</span></span>
 <span><span class="co">#&gt; Proceeding with step 5 [remove_doublets] ...</span></span>
 <span><span class="co">#&gt; Proceeding with step 6 [remove_debris] ...</span></span>
 <span><span class="co">#&gt; The prior specification has no effect when usePrior=no</span></span>
@@ -1283,9 +1267,6 @@ the same experiment id, but with an amended pipeline definition.</p>
 <span><span class="co">#&gt; Compensating file : Donor1.fcs</span></span>
 <span><span class="co">#&gt; Proceeding with step 4 [perform_QC] ...</span></span>
 <span><span class="co">#&gt; Applying PeacoQC method...</span></span>
-<span><span class="co">#&gt; Warning in CheckInputSignalStability(ff, channels, determine_good_cells, :</span></span>
-<span><span class="co">#&gt; There is an inconsistancy in the time channel.  It seems that not all the cells</span></span>
-<span><span class="co">#&gt; are ordered according to time in the flowframe.</span></span>
 <span><span class="co">#&gt; Starting quality control analysis for Donor1.fcs</span></span>
 <span><span class="co">#&gt; Warning in FindIncreasingDecreasingChannels(breaks, ff, channels, plot, : There</span></span>
 <span><span class="co">#&gt; seems to be an increasing or decreasing trend in a channel for Donor1.fcs .</span></span>
@@ -1293,8 +1274,8 @@ the same experiment id, but with an amended pipeline definition.</p>
 <span><span class="co">#&gt; Calculating peaks</span></span>
 <span><span class="co">#&gt; Warning in PeacoQC::PeacoQC(ff = ffIn, channels = channel4QualityControl, :</span></span>
 <span><span class="co">#&gt; There are not enough bins for a robust isolation tree analysis.</span></span>
-<span><span class="co">#&gt; MAD analysis removed 5.32% of the measurements</span></span>
-<span><span class="co">#&gt; The algorithm removed 5.32% of the measurements</span></span>
+<span><span class="co">#&gt; MAD analysis removed 47.4% of the measurements</span></span>
+<span><span class="co">#&gt; The algorithm removed 47.4% of the measurements</span></span>
 <span><span class="co">#&gt; Proceeding with step 5 [remove_doublets] ...</span></span>
 <span><span class="co">#&gt; Proceeding with step 6 [remove_debris] ...</span></span>
 <span><span class="co">#&gt; The prior specification has no effect when usePrior=no</span></span>
@@ -1311,9 +1292,6 @@ the same experiment id, but with an amended pipeline definition.</p>
 <span><span class="co">#&gt; Compensating file : Donor2.fcs</span></span>
 <span><span class="co">#&gt; Proceeding with step 4 [perform_QC] ...</span></span>
 <span><span class="co">#&gt; Applying PeacoQC method...</span></span>
-<span><span class="co">#&gt; Warning in CheckInputSignalStability(ff, channels, determine_good_cells, :</span></span>
-<span><span class="co">#&gt; There is an inconsistancy in the time channel.  It seems that not all the cells</span></span>
-<span><span class="co">#&gt; are ordered according to time in the flowframe.</span></span>
 <span><span class="co">#&gt; Starting quality control analysis for Donor2.fcs</span></span>
 <span><span class="co">#&gt; Warning in FindIncreasingDecreasingChannels(breaks, ff, channels, plot, : There</span></span>
 <span><span class="co">#&gt; seems to be an increasing or decreasing trend in a channel for Donor2.fcs .</span></span>
@@ -1321,8 +1299,8 @@ the same experiment id, but with an amended pipeline definition.</p>
 <span><span class="co">#&gt; Calculating peaks</span></span>
 <span><span class="co">#&gt; Warning in PeacoQC::PeacoQC(ff = ffIn, channels = channel4QualityControl, :</span></span>
 <span><span class="co">#&gt; There are not enough bins for a robust isolation tree analysis.</span></span>
-<span><span class="co">#&gt; MAD analysis removed 1% of the measurements</span></span>
-<span><span class="co">#&gt; The algorithm removed 1% of the measurements</span></span>
+<span><span class="co">#&gt; MAD analysis removed 11.42% of the measurements</span></span>
+<span><span class="co">#&gt; The algorithm removed 11.42% of the measurements</span></span>
 <span><span class="co">#&gt; Proceeding with step 5 [remove_doublets] ...</span></span>
 <span><span class="co">#&gt; Proceeding with step 6 [remove_debris] ...</span></span>
 <span><span class="co">#&gt; The prior specification has no effect when usePrior=no</span></span>
@@ -1377,16 +1355,16 @@ used.</p>
 <span id="cb16-36"><a href="#cb16-36" tabindex="-1"></a>  <span class="sc">|</span>                                                                            </span>
 <span id="cb16-37"><a href="#cb16-37" tabindex="-1"></a>  <span class="er">|</span>                                                                      <span class="er">|</span>   <span class="dv">0</span>%</span>
 <span id="cb16-38"><a href="#cb16-38" tabindex="-1"></a><span class="co">#&gt; #####################################################</span></span>
-<span id="cb16-39"><a href="#cb16-39" tabindex="-1"></a><span class="co">#&gt; </span><span class="al">###</span><span class="co"> NOW PRE-PROCESSING FILE /usr/local/lib/R/site-library/CytoPipeline/extdata/Donor2.fcs...</span></span>
+<span id="cb16-39"><a href="#cb16-39" tabindex="-1"></a><span class="co">#&gt; </span><span class="al">###</span><span class="co"> NOW PRE-PROCESSING FILE /usr/local/lib/R/site-library/CytoPipeline/extdata/Donor1.fcs...</span></span>
 <span id="cb16-40"><a href="#cb16-40" tabindex="-1"></a><span class="co">#&gt; #####################################################</span></span>
 <span id="cb16-41"><a href="#cb16-41" tabindex="-1"></a><span class="co">#&gt; Proceeding with step 1 [flowframe_read] ...</span></span>
 <span id="cb16-42"><a href="#cb16-42" tabindex="-1"></a><span class="co">#&gt; Proceeding with step 2 [remove_margins] ...</span></span>
-<span id="cb16-43"><a href="#cb16-43" tabindex="-1"></a><span class="co">#&gt; Removing margins from file : Donor2.fcs</span></span>
+<span id="cb16-43"><a href="#cb16-43" tabindex="-1"></a><span class="co">#&gt; Removing margins from file : Donor1.fcs</span></span>
 <span id="cb16-44"><a href="#cb16-44" tabindex="-1"></a><span class="co">#&gt; Proceeding with step 3 [compensate] ...</span></span>
-<span id="cb16-45"><a href="#cb16-45" tabindex="-1"></a><span class="co">#&gt; Compensating file : Donor2.fcs</span></span>
+<span id="cb16-45"><a href="#cb16-45" tabindex="-1"></a><span class="co">#&gt; Compensating file : Donor1.fcs</span></span>
 <span id="cb16-46"><a href="#cb16-46" tabindex="-1"></a><span class="co">#&gt; Proceeding with step 4 [perform_QC] ...</span></span>
 <span id="cb16-47"><a href="#cb16-47" tabindex="-1"></a><span class="co">#&gt; Applying PeacoQC method...</span></span>
-<span id="cb16-48"><a href="#cb16-48" tabindex="-1"></a><span class="co">#&gt; Starting quality control analysis for Donor2.fcs</span></span>
+<span id="cb16-48"><a href="#cb16-48" tabindex="-1"></a><span class="co">#&gt; Starting quality control analysis for Donor1.fcs</span></span>
 <span id="cb16-49"><a href="#cb16-49" tabindex="-1"></a><span class="co">#&gt; Calculating peaks</span></span>
 <span id="cb16-50"><a href="#cb16-50" tabindex="-1"></a><span class="co">#&gt; </span></span>
 <span id="cb16-51"><a href="#cb16-51" tabindex="-1"></a>  <span class="sc">|</span>                                                        </span>
@@ -1431,14 +1409,14 @@ used.</p>
 <span id="cb16-90"><a href="#cb16-90" tabindex="-1"></a>  <span class="er">|</span><span class="sc">++++++++++++++++++++++++++++++++++++++++++++++++</span>  <span class="er">|</span>  <span class="dv">95</span>%</span>
 <span id="cb16-91"><a href="#cb16-91" tabindex="-1"></a>  <span class="sc">|</span>                                                        </span>
 <span id="cb16-92"><a href="#cb16-92" tabindex="-1"></a>  <span class="er">|</span><span class="sc">++++++++++++++++++++++++++++++++++++++++++++++++++</span><span class="er">|</span> <span class="dv">100</span>%</span>
-<span id="cb16-93"><a href="#cb16-93" tabindex="-1"></a><span class="co">#&gt; MAD analysis removed 1% of the measurements</span></span>
-<span id="cb16-94"><a href="#cb16-94" tabindex="-1"></a><span class="co">#&gt; The algorithm removed 1% of the measurements</span></span>
+<span id="cb16-93"><a href="#cb16-93" tabindex="-1"></a><span class="co">#&gt; MAD analysis removed 47.4% of the measurements</span></span>
+<span id="cb16-94"><a href="#cb16-94" tabindex="-1"></a><span class="co">#&gt; The algorithm removed 47.4% of the measurements</span></span>
 <span id="cb16-95"><a href="#cb16-95" tabindex="-1"></a><span class="co">#&gt; Proceeding with step 5 [remove_doublets] ...</span></span>
 <span id="cb16-96"><a href="#cb16-96" tabindex="-1"></a><span class="co">#&gt; Proceeding with step 6 [remove_debris] ...</span></span>
 <span id="cb16-97"><a href="#cb16-97" tabindex="-1"></a><span class="co">#&gt; The prior specification has no effect when usePrior=no</span></span>
 <span id="cb16-98"><a href="#cb16-98" tabindex="-1"></a><span class="co">#&gt; Using the serial version of flowClust</span></span>
 <span id="cb16-99"><a href="#cb16-99" tabindex="-1"></a><span class="co">#&gt; Proceeding with step 7 [remove_dead_cells] ...</span></span>
-<span id="cb16-100"><a href="#cb16-100" tabindex="-1"></a><span class="co">#&gt; Removing Dead Cells events (using flowDensity::deGate()) from file : Donor2.fcs</span></span>
+<span id="cb16-100"><a href="#cb16-100" tabindex="-1"></a><span class="co">#&gt; Removing Dead Cells events (using flowDensity::deGate()) from file : Donor1.fcs</span></span>
 <span id="cb16-101"><a href="#cb16-101" tabindex="-1"></a><span class="co">#&gt; The legacy packages maptools, rgdal, and rgeos, underpinning the sp package,</span></span>
 <span id="cb16-102"><a href="#cb16-102" tabindex="-1"></a><span class="co">#&gt; which was just loaded, will retire in October 2023.</span></span>
 <span id="cb16-103"><a href="#cb16-103" tabindex="-1"></a><span class="co">#&gt; Please refer to R-spatial evolution reports for details, especially</span></span>
@@ -1459,16 +1437,16 @@ used.</p>
 <span id="cb16-118"><a href="#cb16-118" tabindex="-1"></a>  <span class="sc">|</span>                                                                            </span>
 <span id="cb16-119"><a href="#cb16-119" tabindex="-1"></a>  <span class="er">|===================================</span>                                   <span class="er">|</span>  <span class="dv">50</span>%</span>
 <span id="cb16-120"><a href="#cb16-120" tabindex="-1"></a><span class="co">#&gt; #####################################################</span></span>
-<span id="cb16-121"><a href="#cb16-121" tabindex="-1"></a><span class="co">#&gt; </span><span class="al">###</span><span class="co"> NOW PRE-PROCESSING FILE /usr/local/lib/R/site-library/CytoPipeline/extdata/Donor1.fcs...</span></span>
+<span id="cb16-121"><a href="#cb16-121" tabindex="-1"></a><span class="co">#&gt; </span><span class="al">###</span><span class="co"> NOW PRE-PROCESSING FILE /usr/local/lib/R/site-library/CytoPipeline/extdata/Donor2.fcs...</span></span>
 <span id="cb16-122"><a href="#cb16-122" tabindex="-1"></a><span class="co">#&gt; #####################################################</span></span>
 <span id="cb16-123"><a href="#cb16-123" tabindex="-1"></a><span class="co">#&gt; Proceeding with step 1 [flowframe_read] ...</span></span>
 <span id="cb16-124"><a href="#cb16-124" tabindex="-1"></a><span class="co">#&gt; Proceeding with step 2 [remove_margins] ...</span></span>
-<span id="cb16-125"><a href="#cb16-125" tabindex="-1"></a><span class="co">#&gt; Removing margins from file : Donor1.fcs</span></span>
+<span id="cb16-125"><a href="#cb16-125" tabindex="-1"></a><span class="co">#&gt; Removing margins from file : Donor2.fcs</span></span>
 <span id="cb16-126"><a href="#cb16-126" tabindex="-1"></a><span class="co">#&gt; Proceeding with step 3 [compensate] ...</span></span>
-<span id="cb16-127"><a href="#cb16-127" tabindex="-1"></a><span class="co">#&gt; Compensating file : Donor1.fcs</span></span>
+<span id="cb16-127"><a href="#cb16-127" tabindex="-1"></a><span class="co">#&gt; Compensating file : Donor2.fcs</span></span>
 <span id="cb16-128"><a href="#cb16-128" tabindex="-1"></a><span class="co">#&gt; Proceeding with step 4 [perform_QC] ...</span></span>
 <span id="cb16-129"><a href="#cb16-129" tabindex="-1"></a><span class="co">#&gt; Applying PeacoQC method...</span></span>
-<span id="cb16-130"><a href="#cb16-130" tabindex="-1"></a><span class="co">#&gt; Starting quality control analysis for Donor1.fcs</span></span>
+<span id="cb16-130"><a href="#cb16-130" tabindex="-1"></a><span class="co">#&gt; Starting quality control analysis for Donor2.fcs</span></span>
 <span id="cb16-131"><a href="#cb16-131" tabindex="-1"></a><span class="co">#&gt; Calculating peaks</span></span>
 <span id="cb16-132"><a href="#cb16-132" tabindex="-1"></a><span class="co">#&gt; </span></span>
 <span id="cb16-133"><a href="#cb16-133" tabindex="-1"></a>  <span class="sc">|</span>                                                        </span>
@@ -1513,14 +1491,14 @@ used.</p>
 <span id="cb16-172"><a href="#cb16-172" tabindex="-1"></a>  <span class="er">|</span><span class="sc">++++++++++++++++++++++++++++++++++++++++++++++++</span>  <span class="er">|</span>  <span class="dv">95</span>%</span>
 <span id="cb16-173"><a href="#cb16-173" tabindex="-1"></a>  <span class="sc">|</span>                                                        </span>
 <span id="cb16-174"><a href="#cb16-174" tabindex="-1"></a>  <span class="er">|</span><span class="sc">++++++++++++++++++++++++++++++++++++++++++++++++++</span><span class="er">|</span> <span class="dv">100</span>%</span>
-<span id="cb16-175"><a href="#cb16-175" tabindex="-1"></a><span class="co">#&gt; MAD analysis removed 5.32% of the measurements</span></span>
-<span id="cb16-176"><a href="#cb16-176" tabindex="-1"></a><span class="co">#&gt; The algorithm removed 5.32% of the measurements</span></span>
+<span id="cb16-175"><a href="#cb16-175" tabindex="-1"></a><span class="co">#&gt; MAD analysis removed 11.42% of the measurements</span></span>
+<span id="cb16-176"><a href="#cb16-176" tabindex="-1"></a><span class="co">#&gt; The algorithm removed 11.42% of the measurements</span></span>
 <span id="cb16-177"><a href="#cb16-177" tabindex="-1"></a><span class="co">#&gt; Proceeding with step 5 [remove_doublets] ...</span></span>
 <span id="cb16-178"><a href="#cb16-178" tabindex="-1"></a><span class="co">#&gt; Proceeding with step 6 [remove_debris] ...</span></span>
 <span id="cb16-179"><a href="#cb16-179" tabindex="-1"></a><span class="co">#&gt; The prior specification has no effect when usePrior=no</span></span>
 <span id="cb16-180"><a href="#cb16-180" tabindex="-1"></a><span class="co">#&gt; Using the serial version of flowClust</span></span>
 <span id="cb16-181"><a href="#cb16-181" tabindex="-1"></a><span class="co">#&gt; Proceeding with step 7 [remove_dead_cells] ...</span></span>
-<span id="cb16-182"><a href="#cb16-182" tabindex="-1"></a><span class="co">#&gt; Removing Dead Cells events (using flowDensity::deGate()) from file : Donor1.fcs</span></span>
+<span id="cb16-182"><a href="#cb16-182" tabindex="-1"></a><span class="co">#&gt; Removing Dead Cells events (using flowDensity::deGate()) from file : Donor2.fcs</span></span>
 <span id="cb16-183"><a href="#cb16-183" tabindex="-1"></a><span class="co">#&gt; The legacy packages maptools, rgdal, and rgeos, underpinning the sp package,</span></span>
 <span id="cb16-184"><a href="#cb16-184" tabindex="-1"></a><span class="co">#&gt; which was just loaded, will retire in October 2023.</span></span>
 <span id="cb16-185"><a href="#cb16-185" tabindex="-1"></a><span class="co">#&gt; Please refer to R-spatial evolution reports for details, especially</span></span>
@@ -1569,61 +1547,60 @@ used.</p>
 <span><span class="co">#&gt; [1] stats     graphics  grDevices utils     datasets  methods   base     </span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; other attached packages:</span></span>
-<span><span class="co">#&gt; [1] patchwork_1.1.3          CytoPipelineUtils_0.99.1 CytoPipelineGUI_0.99.0  </span></span>
-<span><span class="co">#&gt; [4] CytoPipeline_1.1.3      </span></span>
+<span><span class="co">#&gt; [1] patchwork_1.1.3          CytoPipelineUtils_0.99.1 CytoPipelineGUI_0.99.2  </span></span>
+<span><span class="co">#&gt; [4] CytoPipeline_1.1.5      </span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; loaded via a namespace (and not attached):</span></span>
 <span><span class="co">#&gt;   [1] RColorBrewer_1.1-3    jsonlite_1.8.7        shape_1.4.6          </span></span>
-<span><span class="co">#&gt;   [4] magrittr_2.0.3        farver_2.1.1          rmarkdown_2.24       </span></span>
+<span><span class="co">#&gt;   [4] magrittr_2.0.3        farver_2.1.1          rmarkdown_2.25       </span></span>
 <span><span class="co">#&gt;   [7] GlobalOptions_0.1.2   fs_1.6.3              fields_15.2          </span></span>
 <span><span class="co">#&gt;  [10] zlibbioc_1.47.0       ragg_1.2.5            vctrs_0.6.3          </span></span>
 <span><span class="co">#&gt;  [13] memoise_2.0.1         RPMG_2.2-7            htmltools_0.5.6      </span></span>
 <span><span class="co">#&gt;  [16] curl_5.0.2            sass_0.4.7            flowDensity_1.35.0   </span></span>
 <span><span class="co">#&gt;  [19] KernSmooth_2.23-22    bslib_0.5.1           desc_1.4.2           </span></span>
 <span><span class="co">#&gt;  [22] plyr_1.8.8            zoo_1.8-12            cachem_1.0.8         </span></span>
-<span><span class="co">#&gt;  [25] changepoint_2.2.4     RFOC_3.4-6            mime_0.12            </span></span>
+<span><span class="co">#&gt;  [25] changepoint_2.2.4     RFOC_3.4-10           mime_0.12            </span></span>
 <span><span class="co">#&gt;  [28] lifecycle_1.0.3       iterators_1.0.14      pkgconfig_2.0.3      </span></span>
 <span><span class="co">#&gt;  [31] R6_2.5.1              fastmap_1.1.1         shiny_1.7.5          </span></span>
 <span><span class="co">#&gt;  [34] clue_0.3-64           digest_0.6.33         colorspace_2.1-0     </span></span>
 <span><span class="co">#&gt;  [37] S4Vectors_0.39.1      rprojroot_2.0.3       textshaping_0.3.6    </span></span>
 <span><span class="co">#&gt;  [40] RSQLite_2.3.1         labeling_0.4.3        filelock_1.0.2       </span></span>
 <span><span class="co">#&gt;  [43] cytolib_2.13.1        fansi_1.0.4           httr_1.4.7           </span></span>
-<span><span class="co">#&gt;  [46] abind_1.4-5           compiler_4.3.1        splancs_2.01-44      </span></span>
-<span><span class="co">#&gt;  [49] proxy_0.4-27          bit64_4.0.5           withr_2.5.0          </span></span>
-<span><span class="co">#&gt;  [52] doParallel_1.0.17     BiocParallel_1.35.4   carData_3.0-5        </span></span>
-<span><span class="co">#&gt;  [55] DBI_1.1.3             RSEIS_4.1-6           flowClust_3.39.0     </span></span>
-<span><span class="co">#&gt;  [58] hexbin_1.28.3         highr_0.10            gplots_3.1.3         </span></span>
-<span><span class="co">#&gt;  [61] maps_3.4.1            MASS_7.3-60           GEOmap_2.5-2         </span></span>
-<span><span class="co">#&gt;  [64] classInt_0.4-9        rjson_0.2.21          gtools_3.9.4         </span></span>
-<span><span class="co">#&gt;  [67] caTools_1.18.2        units_0.8-3           tools_4.3.1          </span></span>
-<span><span class="co">#&gt;  [70] httpuv_1.6.11         flowAI_1.31.0         IDPmisc_1.1.20       </span></span>
-<span><span class="co">#&gt;  [73] MBA_0.1-0             glue_1.6.2            promises_1.2.1       </span></span>
-<span><span class="co">#&gt;  [76] sf_1.0-14             grid_4.3.1            cluster_2.1.4        </span></span>
-<span><span class="co">#&gt;  [79] reshape2_1.4.4        snow_0.4-4            generics_0.1.3       </span></span>
-<span><span class="co">#&gt;  [82] gtable_0.3.4          class_7.3-22          data.table_1.14.8    </span></span>
-<span><span class="co">#&gt;  [85] sp_2.0-0              car_3.1-2             utf8_1.2.3           </span></span>
-<span><span class="co">#&gt;  [88] BiocGenerics_0.47.0   foreach_1.5.2         pillar_1.9.0         </span></span>
-<span><span class="co">#&gt;  [91] stringr_1.5.0         spam_2.9-1            later_1.3.1          </span></span>
-<span><span class="co">#&gt;  [94] circlize_0.4.15       flowCore_2.13.1       dplyr_1.1.2          </span></span>
-<span><span class="co">#&gt;  [97] PeacoQC_1.11.2        BiocFileCache_2.9.1   lattice_0.21-8       </span></span>
-<span><span class="co">#&gt; [100] deldir_1.0-9          bit_4.0.5             RProtoBufLib_2.13.1  </span></span>
-<span><span class="co">#&gt; [103] tidyselect_1.2.0      ComplexHeatmap_2.17.0 ggcyto_1.29.1        </span></span>
-<span><span class="co">#&gt; [106] knitr_1.43            gridExtra_2.3         IRanges_2.35.2       </span></span>
-<span><span class="co">#&gt; [109] flowWorkspace_4.13.2  stats4_4.3.1          xfun_0.40            </span></span>
-<span><span class="co">#&gt; [112] Biobase_2.61.0        matrixStats_1.0.0     stringi_1.7.12       </span></span>
-<span><span class="co">#&gt; [115] ncdfFlow_2.47.0       yaml_2.3.7            Rwave_2.6-5          </span></span>
-<span><span class="co">#&gt; [118] evaluate_0.21         codetools_0.2-19      interp_1.1-4         </span></span>
-<span><span class="co">#&gt; [121] tibble_3.2.1          Rgraphviz_2.45.0      graph_1.79.0         </span></span>
-<span><span class="co">#&gt; [124] cli_3.6.1             flowViz_1.65.0        xtable_1.8-4         </span></span>
-<span><span class="co">#&gt; [127] systemfonts_1.0.4     munsell_0.5.0         jquerylib_0.1.4      </span></span>
-<span><span class="co">#&gt; [130] Rcpp_1.0.11           dbplyr_2.3.3          png_0.1-8            </span></span>
-<span><span class="co">#&gt; [133] XML_3.99-0.14         parallel_4.3.1        ellipsis_0.3.2       </span></span>
-<span><span class="co">#&gt; [136] pkgdown_2.0.7         ggplot2_3.4.3         blob_1.2.4           </span></span>
-<span><span class="co">#&gt; [139] dotCall64_1.0-2       jpeg_0.1-10           latticeExtra_0.6-30  </span></span>
-<span><span class="co">#&gt; [142] diagram_1.6.5         bitops_1.0-7          viridisLite_0.4.2    </span></span>
-<span><span class="co">#&gt; [145] e1071_1.7-13          scales_1.2.1          purrr_1.0.2          </span></span>
-<span><span class="co">#&gt; [148] crayon_1.5.2          GetoptLong_1.0.5      rlang_1.1.1          </span></span>
-<span><span class="co">#&gt; [151] rgeos_0.6-4</span></span></code></pre>
+<span><span class="co">#&gt;  [46] abind_1.4-5           compiler_4.3.1        proxy_0.4-27         </span></span>
+<span><span class="co">#&gt;  [49] bit64_4.0.5           withr_2.5.0           doParallel_1.0.17    </span></span>
+<span><span class="co">#&gt;  [52] BiocParallel_1.35.4   carData_3.0-5         DBI_1.1.3            </span></span>
+<span><span class="co">#&gt;  [55] RSEIS_4.1-6           flowClust_3.39.0      hexbin_1.28.3        </span></span>
+<span><span class="co">#&gt;  [58] gplots_3.1.3          maps_3.4.1            MASS_7.3-60          </span></span>
+<span><span class="co">#&gt;  [61] GEOmap_2.5-5          classInt_0.4-10       rjson_0.2.21         </span></span>
+<span><span class="co">#&gt;  [64] gtools_3.9.4          caTools_1.18.2        units_0.8-4          </span></span>
+<span><span class="co">#&gt;  [67] tools_4.3.1           httpuv_1.6.11         flowAI_1.31.0        </span></span>
+<span><span class="co">#&gt;  [70] IDPmisc_1.1.20        MBA_0.1-0             glue_1.6.2           </span></span>
+<span><span class="co">#&gt;  [73] promises_1.2.1        sf_1.0-14             grid_4.3.1           </span></span>
+<span><span class="co">#&gt;  [76] cluster_2.1.4         reshape2_1.4.4        snow_0.4-4           </span></span>
+<span><span class="co">#&gt;  [79] generics_0.1.3        gtable_0.3.4          class_7.3-22         </span></span>
+<span><span class="co">#&gt;  [82] data.table_1.14.8     sp_2.0-0              car_3.1-2            </span></span>
+<span><span class="co">#&gt;  [85] utf8_1.2.3            BiocGenerics_0.47.0   foreach_1.5.2        </span></span>
+<span><span class="co">#&gt;  [88] pillar_1.9.0          stringr_1.5.0         spam_2.9-1           </span></span>
+<span><span class="co">#&gt;  [91] later_1.3.1           circlize_0.4.15       flowCore_2.13.1      </span></span>
+<span><span class="co">#&gt;  [94] dplyr_1.1.3           PeacoQC_1.11.2        BiocFileCache_2.9.1  </span></span>
+<span><span class="co">#&gt;  [97] lattice_0.21-8        deldir_1.0-9          bit_4.0.5            </span></span>
+<span><span class="co">#&gt; [100] RProtoBufLib_2.13.1   tidyselect_1.2.0      ComplexHeatmap_2.17.0</span></span>
+<span><span class="co">#&gt; [103] ggcyto_1.29.1         knitr_1.44            gridExtra_2.3        </span></span>
+<span><span class="co">#&gt; [106] IRanges_2.35.2        flowWorkspace_4.13.2  stats4_4.3.1         </span></span>
+<span><span class="co">#&gt; [109] xfun_0.40             Biobase_2.61.0        matrixStats_1.0.0    </span></span>
+<span><span class="co">#&gt; [112] stringi_1.7.12        ncdfFlow_2.47.0       yaml_2.3.7           </span></span>
+<span><span class="co">#&gt; [115] Rwave_2.6-5           evaluate_0.21         codetools_0.2-19     </span></span>
+<span><span class="co">#&gt; [118] interp_1.1-4          tibble_3.2.1          Rgraphviz_2.45.0     </span></span>
+<span><span class="co">#&gt; [121] graph_1.79.1          cli_3.6.1             flowViz_1.65.0       </span></span>
+<span><span class="co">#&gt; [124] xtable_1.8-4          systemfonts_1.0.4     munsell_0.5.0        </span></span>
+<span><span class="co">#&gt; [127] jquerylib_0.1.4       Rcpp_1.0.11           dbplyr_2.3.3         </span></span>
+<span><span class="co">#&gt; [130] png_0.1-8             XML_3.99-0.14         parallel_4.3.1       </span></span>
+<span><span class="co">#&gt; [133] ellipsis_0.3.2        pkgdown_2.0.7         ggplot2_3.4.3        </span></span>
+<span><span class="co">#&gt; [136] blob_1.2.4            dotCall64_1.0-2       jpeg_0.1-10          </span></span>
+<span><span class="co">#&gt; [139] latticeExtra_0.6-30   diagram_1.6.5         bitops_1.0-7         </span></span>
+<span><span class="co">#&gt; [142] viridisLite_0.4.2     e1071_1.7-13          scales_1.2.1         </span></span>
+<span><span class="co">#&gt; [145] purrr_1.0.2           crayon_1.5.2          GetoptLong_1.0.5     </span></span>
+<span><span class="co">#&gt; [148] rlang_1.1.1           rgeos_0.6-4</span></span></code></pre>
 </div>
 <div class="section level2">
 <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a>
